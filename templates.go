@@ -32,6 +32,8 @@ func executeTemplate(name string, context pongo2.Context) (string, error) {
 		if err != nil {
 			return "", errors.Wrapf(err, "fail to load template")
 		}
+
+		templates[name] = tmpl
 	}
 
 	return tmpl.Execute(context)

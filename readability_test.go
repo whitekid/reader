@@ -48,7 +48,7 @@ func TestReadability(t *testing.T) {
 
 			got, err := readableArticle(context.Background(), r, tt.name)
 			if (err != nil) != tt.wantErr {
-				require.Failf(t, `FromReader() failed`, `error = %v, wantErr = %v`, err, tt.wantErr)
+				require.Failf(t, `readableArticle() failed`, `error = %v, wantErr = %v`, err, tt.wantErr)
 			}
 			require.Equal(t, tt.wantTitle, got.Title, "title not equal")
 			require.Equal(t, tt.wantByline, got.Byline, "byline not equal")
