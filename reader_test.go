@@ -11,11 +11,21 @@ import (
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/reader/db"
+	"github.com/whitekid/reader/db/models"
 )
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
 
 func TestMain(m *testing.M) {
 	os.Remove("test.db")
 	db.InitDatabases("test.db")
+	must(db.URL.Save(&models.URL{
+		URL: "https://m.blog.naver.com/businessinsight/222222702267",
+	}))
 
 	os.Exit(m.Run())
 }
