@@ -10,21 +10,23 @@ import (
 var (
 	db *gorm.DB
 
-	URL *URLService
+	URL      *URLService
+	Metadata *MetadataService
 )
 
 func InitDatabases(name string) {
-	adb, err := gorm.Open(sqlite.Open(name), &gorm.Config{})
+	_db, err := gorm.Open(sqlite.Open(name), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Debug("migrating databases....")
-	if err := adb.AutoMigrate(models.Refs...); err != nil {
+	if err := _db.AutoMigrate(models.Refs...); err != nil {
 		log.Fatalf("migrate failed: %v", err)
 	}
 
-	db = adb
+	db = _db
 
 	URL = &URLService{db: db}
+	Metadata = &MetadataService{db: db}
 }

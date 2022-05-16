@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,6 +24,9 @@ import (
 
 func init() {
 	db.InitDatabases("reader.db")
+	if err := migrate(context.Background()); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Run(ctx context.Context) error {
@@ -113,14 +117,14 @@ func (reader *readerService) handleNewURL(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("failed with %d", resp.StatusCode))
 			}
 
-			defer resp.Body.Close()
-			r, err := readableArticle(c.Request().Context(), resp.Body, url)
+			body := resp.String()
+			r, err := readableArticle(c.Request().Context(), strings.NewReader(body), url)
 			if err != nil {
 				log.Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "parse failed")
 			}
 
-			urlRef, err = db.URL.Create(url, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.SiteName)
+			urlRef, err = db.URL.Create(url, body, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.SiteName)
 			if err != nil {
 				log.Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "db IO failed")
