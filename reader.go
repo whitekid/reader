@@ -70,21 +70,28 @@ type Article struct {
 	Favicon     string
 }
 
-func readableArticle(ctx context.Context, r io.Reader, u string) (*Article, error) {
-	cmd := exec.CommandContext(ctx, "node", "readability.js", u)
+func readableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
+	cmd := exec.CommandContext(ctx, "node", "readability.js", url)
 	stdin, _ := cmd.StdinPipe()
 	stdout, _ := cmd.StdoutPipe()
+
 	go func() {
 		defer stdin.Close()
 		io.Copy(stdin, r)
 	}()
 
-	cmd.Start()
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+
 	var article Article
 	if err := json.NewDecoder(stdout).Decode(&article); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	cmd.Wait()
+
+	if err := cmd.Wait(); err != nil {
+		return nil, err
+	}
 
 	return &article, nil
 }
@@ -113,7 +120,7 @@ func (reader *readerService) handleNewURL(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, "parse failed")
 			}
 
-			urlRef, err = db.URL.Create(url, r.Title, r.Content)
+			urlRef, err = db.URL.Create(url, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.SiteName)
 			if err != nil {
 				log.Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, "db IO failed")
