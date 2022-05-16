@@ -47,3 +47,12 @@ func (u *URLService) Save(url *models.URL) error {
 	}
 	return nil
 }
+
+func (u *URLService) List() ([]models.URL, error) {
+	var items []models.URL
+	if r := u.db.Find(&items); r.Error != nil {
+		return nil, r.Error
+	}
+
+	return items, nil
+}

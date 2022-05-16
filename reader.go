@@ -16,18 +16,12 @@ import (
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/goxp/service"
-	"github.com/whitekid/goxp/slug"
 	"github.com/whitekid/reader/config"
 	"github.com/whitekid/reader/db"
 	"gorm.io/gorm"
 )
 
-var shortner *slug.Shortner
-
 func init() {
-	const encoding = "kJrMZwBbP-1AjW6HuEaxXeTVQU0dy8p29N7g4mYqDlGR_c5nCiIOtozhSsfKL3Fv" // generated with `goxp slug new`
-
-	shortner = slug.NewShortner(encoding)
 	db.InitDatabases("reader.db")
 }
 
