@@ -30,3 +30,7 @@ func InitDatabases(name string) {
 	URL = &URLService{db: db}
 	Metadata = &MetadataService{db: db}
 }
+
+func Exec(sql string, values ...interface{}) *gorm.DB {
+	return db.Exec(sql, values...)
+}
