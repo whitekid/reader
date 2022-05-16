@@ -31,9 +31,10 @@ func (u *URLService) ByURL(url string) (*models.URL, error) {
 func (u *URLService) NoOrignalContent() ([]models.URL, error) {
 	var urls []models.URL
 
-	if r := u.db.Where("original_content = ?", "").Find(&urls); r.Error != nil {
+	if r := u.db.Where("original_content is null").Find(&urls); r.Error != nil {
 		return nil, r.Error
 	}
+
 	return urls, nil
 }
 

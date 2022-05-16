@@ -41,7 +41,7 @@ func migrate_v1(ctx context.Context) error {
 	}
 
 	for _, url := range urls {
-		log.Info("getting... %d %s", url.ID, url.URL)
+		log.Infof("getting... %d %s", url.ID, url.URL)
 		resp, err := request.Get(url.URL).FollowRedirect(true).Do(ctx)
 		if err != nil {
 			return err
