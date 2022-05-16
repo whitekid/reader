@@ -28,15 +28,25 @@ func (u *URLService) ByURL(url string) (*models.URL, error) {
 	return ref, nil
 }
 
-func (u *URLService) Create(url string, title string, content string, textContent string, length int, excerpt string, siteName string) (*models.URL, error) {
+func (u *URLService) NoOrignalContent() ([]models.URL, error) {
+	var urls []models.URL
+
+	if r := u.db.Where("original_content = ?", "").Find(&urls); r.Error != nil {
+		return nil, r.Error
+	}
+	return urls, nil
+}
+
+func (u *URLService) Create(url string, originalContent string, title string, content string, textContent string, length int, excerpt string, siteName string) (*models.URL, error) {
 	urlRef := &models.URL{
-		URL:         url,
-		Title:       title,
-		Content:     content,
-		TextContent: textContent,
-		Length:      length,
-		Excerpt:     excerpt,
-		SiteName:    siteName,
+		URL:             url,
+		OriginalContent: originalContent,
+		Title:           title,
+		Content:         content,
+		TextContent:     textContent,
+		Length:          length,
+		Excerpt:         excerpt,
+		SiteName:        siteName,
 	}
 	if r := u.db.Save(urlRef); r.Error != nil {
 		return nil, r.Error
