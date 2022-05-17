@@ -8,10 +8,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/reader/db"
-	"github.com/whitekid/reader/db/models"
+	"github.com/whitekid/reader/testutils"
 )
 
 func must(err error) {
@@ -21,16 +20,21 @@ func must(err error) {
 }
 
 func TestMain(m *testing.M) {
-	os.Remove("test.db")
-	db.InitDatabases("test.db")
-	must(db.URL.Save(&models.URL{
-		URL: "https://m.blog.naver.com/businessinsight/222222702267",
-	}))
+	sqlDB, err := db.InitDatabases("test.db")
+	must(err)
+
+	testutils.SetupFixtureDatabase(sqlDB)
 
 	os.Exit(m.Run())
 }
 
-func TestReader(t *testing.T) {
+func TestFixtureLoad(t *testing.T) {
+	urls, err := db.URL.List()
+	require.NoError(t, err)
+	require.NotEqual(t, 0, len(urls))
+}
+
+func TestNewURL(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -43,8 +47,7 @@ func TestReader(t *testing.T) {
 		args     args
 		wantSlug string
 	}{
-		{"https://m.blog.naver.com/businessinsight/222222702267", args{}, "ku"},
-		{`https://www.besuccess.com/opinion/%ec%9d%bc%ec%9d%84-%ed%95%98%eb%8a%94%eb%8d%b0-%ec%a4%91%ec%9a%94%ed%95%9c-%eb%84%a4-%ea%b0%80%ec%a7%80/`, args{}, "k9"},
+		{"https://m.blog.naver.com/businessinsight/222719467943", args{}, shortner.Encode(4)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,11 +60,34 @@ func TestReader(t *testing.T) {
 				resp, err := request.Get(ts.URL + resp.Header.Get(request.HeaderLocation)).Do(ctx)
 				require.NoError(t, err)
 				require.True(t, resp.Success())
-				log.Debugf("html: %s", resp.String())
 			}
 		})
 	}
+}
 
+func TestNewURLError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ts := newTestServer(ctx)
+
+	type args struct {
+		url string
+	}
+	tests := [...]struct {
+		name string
+		args args
+	}{
+		{"host not found", args{url: "https://www.ciokoreaxxxx.com/news/x/236504"}},
+		{"not found", args{url: "https://www.ciokorea.com/news/x/236504"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := request.Get(ts.URL + "/read/" + tt.args.url).Do(ctx)
+			require.NoError(t, err)
+			require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		})
+	}
 }
 
 func TestViewByID(t *testing.T) {
@@ -73,7 +99,7 @@ func TestViewByID(t *testing.T) {
 	resp, err := request.Get(ts.URL + "/r/1").Do(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusFound, resp.StatusCode)
-	require.Equal(t, "/r/ku", resp.Header.Get("Location"))
+	require.Equal(t, "/r/"+shortner.Encode(1), resp.Header.Get("Location"))
 }
 
 func newTestServer(ctx context.Context) *httptest.Server {
