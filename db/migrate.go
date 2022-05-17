@@ -1,4 +1,4 @@
-package reader
+package db
 
 import (
 	"context"
@@ -6,12 +6,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
-	"github.com/whitekid/reader/db"
 )
 
 func migrate(ctx context.Context) error {
-	schemaVersion := db.Metadata.SchemaVersion()
+	migFuncs := map[uint]func(ctx context.Context) error{
+		1: migrate_v1,
+	}
 
+	schemaVersion := Metadata.SchemaVersion()
 	for v := schemaVersion + 1; ; v++ {
 		fn, ok := migFuncs[v]
 		if !ok {
@@ -23,19 +25,15 @@ func migrate(ctx context.Context) error {
 		if err := fn(ctx); err != nil {
 			return err
 		}
-		db.Metadata.SetSchemaVersion(v)
+		Metadata.SetSchemaVersion(v)
 	}
 
 	return nil
 }
 
-var migFuncs = map[uint]func(ctx context.Context) error{
-	1: migrate_v1,
-}
-
 // original content 채워넣기
 func migrate_v1(ctx context.Context) error {
-	urls, err := db.URL.NoOrignalContent()
+	urls, err := URL.noOrignalContent()
 	if err != nil {
 		return err
 	}
@@ -51,7 +49,7 @@ func migrate_v1(ctx context.Context) error {
 		}
 
 		url.OriginalContent = resp.String()
-		if err := db.URL.Save(&url); err != nil {
+		if err := URL.Save(&url); err != nil {
 			return err
 		}
 	}

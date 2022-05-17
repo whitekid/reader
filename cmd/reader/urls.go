@@ -6,6 +6,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
+	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/reader"
 	"github.com/whitekid/reader/db"
 )
@@ -14,6 +15,21 @@ func init() {
 	cmd := &cobra.Command{
 		Use: "urls",
 	}
+
+	cmd.AddCommand(&cobra.Command{
+		Use:   "new url",
+		Short: "add new url",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			for _, url := range args {
+				log.Debugf("%s", url)
+				if _, err := reader.AddURL(cmd.Context(), url); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	})
 
 	cmd.AddCommand(&cobra.Command{
 		Use:   "list",
