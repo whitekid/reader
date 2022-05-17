@@ -2,7 +2,7 @@ package db
 
 import (
 	"github.com/pkg/errors"
-	"github.com/whitekid/reader/db/models"
+	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +28,7 @@ func (u *URLService) ByURL(url string) (*models.URL, error) {
 	return ref, nil
 }
 
-func (u *URLService) NoOrignalContent() ([]models.URL, error) {
+func (u *URLService) noOrignalContent() ([]models.URL, error) {
 	var urls []models.URL
 
 	if r := u.db.Where("original_content is null").Find(&urls); r.Error != nil {

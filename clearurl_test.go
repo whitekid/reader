@@ -19,6 +19,7 @@ func TestCleanURL(t *testing.T) {
 		{"redirect", args{"https://blog.naver.com/businessinsight/222265339878"}, "https://m.blog.naver.com/businessinsight/222265339878"},
 		{"redirect", args{"https://m.blog.naver.com/PostView.naver?blogId=businessinsight&logNo=222222702267&redirect=Dlog&widgetTypeCall=true&directAccess=false"}, "https://m.blog.naver.com/businessinsight/222222702267"},
 		{"redirect", args{"https://infutureconsulting.tistory.com/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
+		{"redirect", args{"https://infutureconsulting.tistory.com/m/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
 		{"redirect", args{"https://infuture.kr/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
 	}
 	for _, tt := range tests {

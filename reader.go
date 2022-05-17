@@ -19,15 +19,9 @@ import (
 	"github.com/whitekid/goxp/service"
 	"github.com/whitekid/reader/config"
 	"github.com/whitekid/reader/db"
+	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
 )
-
-func init() {
-	db.InitDatabases("reader.db")
-	if err := migrate(context.Background()); err != nil {
-		log.Fatal(err)
-	}
-}
 
 func Run(ctx context.Context) error {
 	return newReaderService().Serve(ctx)
@@ -104,47 +98,60 @@ func (reader *readerService) handleNewURL(c echo.Context) error {
 	url := c.Param("url")
 	url = cleanURL(url)
 
+	urlRef, err := AddURL(c.Request().Context(), url)
+	if err != nil {
+		log.Errorf("failed: %+v, %t, url=%s", err, err, url)
+		return err
+	}
+
+	return c.Redirect(http.StatusFound, "/r/"+shortner.Encode(int64(urlRef.ID)))
+}
+
+var ()
+
+func AddURL(ctx context.Context, url string) (*models.URL, error) {
+	url = cleanURL(url)
+
 	urlRef, err := db.URL.ByURL(url)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			resp, err := request.Get(url).FollowRedirect(true).Do(c.Request().Context())
-			if err != nil {
-				log.Error(err)
-				return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-			}
-			if !resp.Success() {
-				log.Errorf("failed with %d, url=%s", resp.StatusCode, url)
-				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("failed with %d", resp.StatusCode))
-			}
-
-			body := resp.String()
-			r, err := readableArticle(c.Request().Context(), strings.NewReader(body), url)
-			if err != nil {
-				log.Error(err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "parse failed")
-			}
-
-			urlRef, err = db.URL.Create(url, body, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.SiteName)
-			if err != nil {
-				log.Error(err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "db IO failed")
-			}
-		} else {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Error(err)
-			return errors.Wrapf(err, "fail to save url: %s", url)
+			return nil, errors.Wrapf(err, "fail to save url: %s", url)
+		}
+
+		resp, err := request.Get(url).FollowRedirect(true).Do(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if !resp.Success() {
+			return nil, errors.Errorf("failed with %d, url=%s", resp.StatusCode, url)
+		}
+
+		body := resp.String()
+		r, err := readableArticle(ctx, strings.NewReader(body), url)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+
+		urlRef, err = db.URL.Create(url, body, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.SiteName)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	enc := shortner.Encode(int64(urlRef.ID))
-	return c.Redirect(http.StatusFound, "/r/"+enc)
+	return urlRef, nil
 }
+
+var regDigits = regexp.MustCompile(`^\d+$`)
 
 func (reader *readerService) handleView(c echo.Context) error {
 	slug := c.Param("slug")
 	var articleId uint
 
 	log.Debugf("slug: %s", slug)
-	if matched, err := regexp.MatchString(`^\d+$`, slug); err == nil && matched {
+	if regDigits.MatchString(slug) {
 		id, _ := strconv.ParseInt(slug, 10, 64)
 		return c.Redirect(http.StatusFound, fmt.Sprintf("/r/%s", shortner.Encode(id)))
 	} else {

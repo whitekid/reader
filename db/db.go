@@ -1,8 +1,11 @@
 package db
 
 import (
+	"context"
+	"database/sql"
+
 	"github.com/whitekid/goxp/log"
-	"github.com/whitekid/reader/db/models"
+	"github.com/whitekid/reader/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,23 +17,32 @@ var (
 	Metadata *MetadataService
 )
 
-func InitDatabases(name string) {
+func InitDatabases(name string) (*sql.DB, error) {
+	log.Debugf("opening %s", name)
 	_db, err := gorm.Open(sqlite.Open(name), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	log.Debug("migrating databases....")
 	if err := _db.AutoMigrate(models.Refs...); err != nil {
-		log.Fatalf("migrate failed: %v", err)
+		return nil, err
 	}
 
 	db = _db
 
 	URL = &URLService{db: db}
 	Metadata = &MetadataService{db: db}
+
+	if err := migrate(context.Background()); err != nil {
+		return nil, err
+	}
+
+	return db.DB()
 }
 
-func Exec(sql string, values ...interface{}) *gorm.DB {
-	return db.Exec(sql, values...)
-}
+// DB get sql.DB
+func DB() (*sql.DB, error) { return db.DB() }
+
+// Exec execute direct SQL
+func Exec(sql string, values ...interface{}) *gorm.DB { return db.Exec(sql, values...) }

@@ -9,9 +9,9 @@ func init() {
 type URL struct {
 	gorm.Model
 
-	URL             string `gorm:"index:,unique,where deleted_at is not null"`
-	OriginalContent string
-	Title           string
+	URL             string `gorm:"index:,unique,where deleted_at is not null" json:"url"`
+	OriginalContent string `json:"originalContent"`
+	Title           string `json:"title"`
 	Content         string
 	TextContent     string
 	Length          int
