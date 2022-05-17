@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/whitekid/reader/db/models"
+	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
 )
 

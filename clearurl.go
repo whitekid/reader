@@ -43,8 +43,8 @@ var removeRules = []string{
 var redirectRules = [][]string{
 	{`^https://blog.naver.com/(\w+)/(\w+)`, `https://m.blog.naver.com/$1/$2`},
 	{`^https://m.blog.naver.com/PostView.naver\?blogId=(\w+)&logNo=(\w+).*`, `https://m.blog.naver.com/$1/$2`},
-	{`^https://(.+).tistory.com/(\w+)`, `https://$1.tistory.com/m/$2`},
-	{`^https://infuture.kr/(\w+)`, `https://infutureconsulting.tistory.com/m/$1`},
+	{`^https://(.+).tistory.com/(\d+)`, `https://$1.tistory.com/m/$2`},
+	{`^https://infuture.kr/(\d+)`, `https://infutureconsulting.tistory.com/m/$1`},
 }
 
 var (
@@ -73,8 +73,8 @@ func init() {
 func cleanURL(url string) string {
 	log.Debugf("before clean url: %s", url)
 
-	fx.ForEach(removeRuleExps, func(_ int, regex *regexp.Regexp) { url = regex.ReplaceAllString(url, "") })
-	fx.ForEach(redirectRuleExps, func(_ int, red *redirectMap) { url = red.Regex.ReplaceAllString(url, red.Repl) })
+	fx.ForEach(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
+	fx.ForEach(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
 
 	log.Debugf("after clean url: %s", url)
 	return url
