@@ -71,3 +71,8 @@ func (u *URLService) List() ([]models.URL, error) {
 
 	return items, nil
 }
+
+func (u *URLService) DeleteByID(ID uint) error {
+	r := u.db.Delete(&models.URL{}, ID)
+	return r.Error
+}
