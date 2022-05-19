@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/whitekid/goxp"
+	"github.com/whitekid/goxp/fixtures"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/reader/db"
-	"github.com/whitekid/reader/testutils"
 )
 
 func must(err error) {
@@ -20,10 +22,10 @@ func must(err error) {
 }
 
 func TestMain(m *testing.M) {
-	sqlDB, err := db.InitDatabases("test.db")
+	sqlDB, err := db.Open("test.db")
 	must(err)
 
-	testutils.SetupFixtureDatabase(sqlDB)
+	fixtures.Database(sqlDB, "sqlite", path.Join(path.Dir(goxp.Filename()), "fixtures/testdata"))
 
 	os.Exit(m.Run())
 }

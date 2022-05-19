@@ -17,7 +17,7 @@ var (
 	Metadata *MetadataService
 )
 
-func InitDatabases(name string) (*sql.DB, error) {
+func Open(name string) (*sql.DB, error) {
 	log.Debugf("opening %s", name)
 	_db, err := gorm.Open(sqlite.Open(name), &gorm.Config{})
 	if err != nil {

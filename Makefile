@@ -24,6 +24,7 @@ dep:
 	rm -f go.mod go.sum
 	go mod init ${GO_PKG}
 
+	go get github.com/whitekid/goxp@62936a6650e354d0e3b34715dd5200bef7d5c0b8
 	@$(MAKE) tidy
 
 tidy:

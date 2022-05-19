@@ -11,7 +11,7 @@ var rootCmd = &cobra.Command{
 	Use:   "reader",
 	Short: "readibility viewer",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if _, err := db.InitDatabases(config.Database()); err != nil {
+		if _, err := db.Open(config.Database()); err != nil {
 			return err
 		}
 
