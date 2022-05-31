@@ -100,14 +100,12 @@ func (reader *readerService) handleNewURL(c echo.Context) error {
 
 	urlRef, err := AddURL(c.Request().Context(), url)
 	if err != nil {
-		log.Errorf("failed: %+v, %t, url=%s", err, err, url)
+		log.Errorf("failed: %+v, url=%s", err, url)
 		return err
 	}
 
 	return c.Redirect(http.StatusFound, "/r/"+shortner.Encode(int64(urlRef.ID)))
 }
-
-var ()
 
 func AddURL(ctx context.Context, url string) (*models.URL, error) {
 	url = cleanURL(url)
@@ -119,7 +117,10 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 			return nil, errors.Wrapf(err, "fail to save url: %s", url)
 		}
 
-		resp, err := request.Get(url).FollowRedirect(true).Do(ctx)
+		resp, err := request.Get(url).
+			FollowRedirect(true).
+			Header(request.HeaderUserAgent, config.UserAgent()).
+			Do(ctx)
 		if err != nil {
 			return nil, err
 		}
