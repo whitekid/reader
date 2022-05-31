@@ -50,6 +50,7 @@ func TestNewURL(t *testing.T) {
 		wantSlug string
 	}{
 		{"https://m.blog.naver.com/businessinsight/222719467943", args{}, shortner.Encode(4)},
+		{"https://zdnet.co.kr/view/?no=20090914155953", args{}, shortner.Encode(5)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -62,6 +63,13 @@ func TestNewURL(t *testing.T) {
 				resp, err := request.Get(ts.URL + resp.Header.Get(request.HeaderLocation)).Do(ctx)
 				require.NoError(t, err)
 				require.True(t, resp.Success())
+			}
+			{
+				id, err := shortner.Decode(tt.wantSlug)
+				require.NoError(t, err)
+				got, err := db.URL.ByID(uint(id))
+				require.NoError(t, err)
+				require.Equal(t, tt.name, got.URL)
 			}
 		})
 	}
