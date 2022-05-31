@@ -21,6 +21,7 @@ func TestCleanURL(t *testing.T) {
 		{"redirect", args{"https://infutureconsulting.tistory.com/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
 		{"redirect", args{"https://infutureconsulting.tistory.com/m/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
 		{"redirect", args{"https://infuture.kr/1177"}, "https://infutureconsulting.tistory.com/m/1177"},
+		{"redirect", args{"https://zdnet.co.kr/view/?no=20090914155953"}, "https://zdnet.co.kr/view/?no=20090914155953"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
