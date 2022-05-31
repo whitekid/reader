@@ -35,6 +35,7 @@ func init() {
 	v.AutomaticEnv()
 
 	flags.InitDefaults(nil, configs)
+	flags.InitDefaults(nil, persistentConfigs)
 }
 
 func InitFlagSet(use string, cmd *cobra.Command) {
