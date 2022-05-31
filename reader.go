@@ -95,8 +95,9 @@ func readableArticle(ctx context.Context, r io.Reader, url string) (*Article, er
 }
 
 func (reader *readerService) handleNewURL(c echo.Context) error {
-	url := c.Param("url")
-	url = cleanURL(url)
+	// /read/<url> 형태로 줄 때 url에 ?가 들어있으면 query parameter로 해석이 되어서 c.Param()으로 가져올 수 없음
+	// 따라서 RequestURI에서 /read/를 빼고 URL로 처리한다.
+	url := c.Request().RequestURI[6:]
 
 	urlRef, err := AddURL(c.Request().Context(), url)
 	if err != nil {
