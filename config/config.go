@@ -10,6 +10,7 @@ const (
 	keyBind         = "bind_addr"
 	keySlugEncoding = "slug_encoding"
 	keyDatabase     = "database"
+	keyUserAgent    = "user-agent"
 )
 
 var configs = map[string][]flags.Flag{
@@ -22,6 +23,7 @@ var configs = map[string][]flags.Flag{
 var persistentConfigs = map[string][]flags.Flag{
 	"reader": {
 		{keyDatabase, "d", "reader.db", "database"},
+		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0", ""},
 	},
 }
 
@@ -43,4 +45,5 @@ func InitFlagSet(use string, cmd *cobra.Command) {
 func BindAddr() string { return v.GetString(keyBind) }
 func Encoding() string { return v.GetString(keySlugEncoding) }
 
-func Database() string { return v.GetString(keyDatabase) }
+func Database() string  { return v.GetString(keyDatabase) }
+func UserAgent() string { return v.GetString(keyUserAgent) }
