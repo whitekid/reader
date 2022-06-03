@@ -38,7 +38,9 @@ func (u *URLService) noOrignalContent() ([]models.URL, error) {
 	return urls, nil
 }
 
-func (u *URLService) Create(url string, originalContent string, title string, content string, textContent string, length int, excerpt string, siteName string) (*models.URL, error) {
+func (u *URLService) Create(url string, originalContent string, title string,
+	content string, textContent string, length int, excerpt string,
+	byLine string, siteName string) (*models.URL, error) {
 	urlRef := &models.URL{
 		URL:             url,
 		OriginalContent: originalContent,
@@ -47,6 +49,7 @@ func (u *URLService) Create(url string, originalContent string, title string, co
 		TextContent:     textContent,
 		Length:          length,
 		Excerpt:         excerpt,
+		ByLine:          byLine,
 		SiteName:        siteName,
 	}
 	if r := u.db.Save(urlRef); r.Error != nil {
