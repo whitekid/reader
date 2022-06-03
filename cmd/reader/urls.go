@@ -34,12 +34,11 @@ func init() {
 	})
 
 	cmd.AddCommand(&cobra.Command{
-		Use:   "update url",
+		Use:   "update id",
 		Short: "update url",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			for _, url := range args {
-				log.Debugf("%s", url)
-				if _, err := reader.UpdateURL(cmd.Context(), url); err != nil {
+			for _, id := range args {
+				if _, err := reader.UpdateURL(cmd.Context(), id); err != nil {
 					return err
 				}
 			}
