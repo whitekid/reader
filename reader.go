@@ -146,10 +146,14 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 	return urlRef, nil
 }
 
-func UpdateURL(ctx context.Context, idText string) (*models.URL, error) {
-	id, err := strconv.Atoi(idText)
+func UpdateURL(ctx context.Context, idOrShorten string) (*models.URL, error) {
+	id, err := strconv.Atoi(idOrShorten)
 	if err != nil {
-		return nil, err
+		decoded, err := shortner.Decode(idOrShorten)
+		if err != nil {
+			return nil, err
+		}
+		id = int(decoded)
 	}
 
 	urlRef, err := db.URL.ByID(uint(id))
