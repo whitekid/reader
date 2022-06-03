@@ -137,7 +137,7 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 			return nil, err
 		}
 
-		urlRef, err = db.URL.Create(url, body, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt,r.Byline, r.SiteName)
+		urlRef, err = db.URL.Create(url, body, r.Title, r.Content, r.TextContent, r.Length, r.Excerpt, r.Byline, r.SiteName)
 		if err != nil {
 			return nil, err
 		}
@@ -146,15 +146,19 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 	return urlRef, nil
 }
 
-func UpdateURL(ctx context.Context, url string) (*models.URL, error) {
-	url = cleanURL(url)
-
-	urlRef, err := db.URL.ByURL(url)
+func UpdateURL(ctx context.Context, idText string) (*models.URL, error) {
+	id, err := strconv.Atoi(idText)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := request.Get(url).
+	urlRef, err := db.URL.ByID(uint(id))
+	urlRef.URL = cleanURL(urlRef.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := request.Get(urlRef.URL).
 		FollowRedirect(true).
 		Header(request.HeaderUserAgent, config.UserAgent()).
 		Do(ctx)
@@ -163,11 +167,11 @@ func UpdateURL(ctx context.Context, url string) (*models.URL, error) {
 	}
 
 	if !resp.Success() {
-		return nil, errors.Errorf("failed with %d, url=%s", resp.StatusCode, url)
+		return nil, errors.Errorf("failed with %d, url=%s", resp.StatusCode, urlRef.URL)
 	}
 
 	body := resp.String()
-	r, err := readableArticle(ctx, strings.NewReader(body), url)
+	r, err := readableArticle(ctx, strings.NewReader(body), urlRef.URL)
 	if err != nil {
 		log.Error(err)
 		return nil, err
