@@ -42,6 +42,7 @@ var removeRules = []string{
 
 var redirectRules = [][]string{
 	{`^https://blog.naver.com/(\w+)/(\w+)`, `https://m.blog.naver.com/$1/$2`},
+	{`^http://blog.naver.com/(\w+)/(\w+)`, `https://m.blog.naver.com/$1/$2`},
 	{`^https://m.blog.naver.com/PostView.(naver|nhn)\?blogId=(\w+)&logNo=(\w+).*`, `https://m.blog.naver.com/$2/$3`},
 	{`^https://(.+).tistory.com/(\d+)`, `https://$1.tistory.com/m/$2`},
 	{`^https://infuture.kr/(\d+)`, `https://infutureconsulting.tistory.com/m/$1`},

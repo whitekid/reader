@@ -17,4 +17,5 @@ type URL struct {
 	Length          int
 	Excerpt         string
 	SiteName        string
+	ByLine          string
 }
