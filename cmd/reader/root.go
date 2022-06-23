@@ -2,9 +2,10 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/whitekid/reader"
-	"github.com/whitekid/reader/config"
-	"github.com/whitekid/reader/db"
+
+	"reader"
+	"reader/config"
+	"reader/db"
 )
 
 var rootCmd = &cobra.Command{

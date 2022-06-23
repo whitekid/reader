@@ -1,0 +1,12 @@
+**/*.sw[op]
+**/*.git
+**/.vscode
+
+Dockerfile
+**/.dockerignore
+
+bin/
+**/*_test.go
+
+**/.DS_Store
+**/.envrc

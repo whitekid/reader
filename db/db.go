@@ -5,9 +5,10 @@ import (
 	"database/sql"
 
 	"github.com/whitekid/goxp/log"
-	"github.com/whitekid/reader/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+
+	"reader/models"
 )
 
 var (

@@ -6,8 +6,9 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
+
+	"reader/models"
 )
 
 type MetadataService struct {
