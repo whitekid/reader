@@ -2,8 +2,9 @@ package db
 
 import (
 	"github.com/pkg/errors"
-	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
+
+	"reader/models"
 )
 
 type URLService struct {
@@ -78,4 +79,13 @@ func (u *URLService) List() ([]models.URL, error) {
 func (u *URLService) DeleteByID(ID uint) error {
 	r := u.db.Delete(&models.URL{}, ID)
 	return r.Error
+}
+
+func (u *URLService) Random() (*models.URL, error) {
+	ref := &models.URL{}
+	if r := u.db.Order("random()").First(ref); r.Error != nil {
+		return nil, errors.Wrap(r.Error, "fail to get random url")
+	}
+
+	return ref, nil
 }
