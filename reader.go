@@ -17,10 +17,11 @@ import (
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/goxp/service"
-	"github.com/whitekid/reader/config"
-	"github.com/whitekid/reader/db"
-	"github.com/whitekid/reader/models"
 	"gorm.io/gorm"
+
+	"reader/config"
+	"reader/db"
+	"reader/models"
 )
 
 func Run(ctx context.Context) error {
@@ -43,6 +44,7 @@ func newReaderService() *readerService {
 
 	r.e.GET("/read/:url", r.handleNewURL)
 	r.e.GET("/r/:slug", r.handleView)
+	r.e.GET("/", r.randomView)
 
 	return r
 }
@@ -230,4 +232,15 @@ func (reader *readerService) handleView(c echo.Context) error {
 	}
 
 	return c.HTML(http.StatusOK, html)
+}
+
+func (reader *readerService) randomView(c echo.Context) error {
+	url, err := db.URL.Random()
+	if err != nil {
+		return err
+	}
+
+	slug := shortner.Encode(int64(url.ID))
+
+	return c.Redirect(http.StatusFound, fmt.Sprintf("/r/%s", slug))
 }

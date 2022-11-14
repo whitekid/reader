@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/whitekid/goxp"
-	"github.com/whitekid/goxp/fixtures"
 	"github.com/whitekid/goxp/request"
-	"github.com/whitekid/reader/db"
+
+	"reader/db"
+	"reader/testutils"
 )
 
 func must(err error) {
@@ -22,12 +22,24 @@ func must(err error) {
 }
 
 func TestMain(m *testing.M) {
-	sqlDB, err := db.Open("test.db")
+	db, err := db.Open("test.db")
 	must(err)
 
-	fixtures.Database(sqlDB, "sqlite", path.Join(path.Dir(goxp.Filename()), "fixtures/testdata"))
+	testutils.SetupFixtureDatabase(db)
 
 	os.Exit(m.Run())
+}
+
+func newTestServer(ctx context.Context) *httptest.Server {
+	reader := newReaderService()
+	ts := httptest.NewServer(reader.e)
+
+	go func() {
+		<-ctx.Done()
+		defer ts.Close()
+	}()
+
+	return ts
 }
 
 func TestFixtureLoad(t *testing.T) {
@@ -112,14 +124,14 @@ func TestViewByID(t *testing.T) {
 	require.Equal(t, "/r/"+shortner.Encode(1), resp.Header.Get("Location"))
 }
 
-func newTestServer(ctx context.Context) *httptest.Server {
-	reader := newReaderService()
-	ts := httptest.NewServer(reader.e)
+func TestRandomView(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	go func() {
-		<-ctx.Done()
-		defer ts.Close()
-	}()
+	ts := newTestServer(ctx)
 
-	return ts
+	resp, err := request.Get(ts.URL + "/").Do(ctx)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusFound, resp.StatusCode)
+	require.NotEqual(t, "", resp.Header.Get(echo.HeaderLocation))
 }

@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/spf13/cobra"
-	"github.com/whitekid/reader/db"
+
+	"reader/db"
 )
 
 func init() {

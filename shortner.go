@@ -2,7 +2,8 @@ package reader
 
 import (
 	"github.com/whitekid/goxp/slug"
-	"github.com/whitekid/reader/config"
+
+	"reader/config"
 )
 
 var shortner *slug.Shortner
