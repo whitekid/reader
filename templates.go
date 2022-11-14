@@ -2,9 +2,9 @@ package reader
 
 import (
 	"embed"
-	"io/ioutil"
+	"io"
 
-	"github.com/flosch/pongo2/v5"
+	"github.com/flosch/pongo2/v6"
 	"github.com/pkg/errors"
 )
 
@@ -23,7 +23,7 @@ func executeTemplate(name string, context pongo2.Context) (string, error) {
 		}
 		defer fs.Close()
 
-		content, err := ioutil.ReadAll(fs)
+		content, err := io.ReadAll(fs)
 		if err != nil {
 			return "", errors.Wrapf(err, "fail to read file")
 		}
