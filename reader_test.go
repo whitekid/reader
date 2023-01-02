@@ -66,7 +66,7 @@ func TestNewURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := request.Get(ts.URL + "/read/" + tt.name).Do(ctx)
+			resp, err := request.Get(ts.URL + "/read/" + tt.name).FollowRedirect(false).Do(ctx)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusFound, resp.StatusCode)
 			require.Equal(t, "/r/"+tt.wantSlug, resp.Header.Get(request.HeaderLocation))
@@ -118,7 +118,7 @@ func TestViewByID(t *testing.T) {
 
 	ts := newTestServer(ctx)
 
-	resp, err := request.Get(ts.URL + "/r/1").Do(ctx)
+	resp, err := request.Get(ts.URL + "/r/1").FollowRedirect(false).Do(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusFound, resp.StatusCode)
 	require.Equal(t, "/r/"+shortner.Encode(1), resp.Header.Get("Location"))
@@ -130,7 +130,7 @@ func TestRandomView(t *testing.T) {
 
 	ts := newTestServer(ctx)
 
-	resp, err := request.Get(ts.URL + "/").Do(ctx)
+	resp, err := request.Get(ts.URL + "/").FollowRedirect(false).Do(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusFound, resp.StatusCode)
 	require.NotEqual(t, "", resp.Header.Get(echo.HeaderLocation))
