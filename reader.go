@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/flosch/pongo2/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
+	"github.com/whitekid/goxp"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/goxp/service"
@@ -71,26 +72,26 @@ type Article struct {
 }
 
 func readableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
-	cmd := exec.CommandContext(ctx, "node", "readability.js", url)
-	stdin, _ := cmd.StdinPipe()
-	stdout, _ := cmd.StdoutPipe()
-
-	go func() {
-		defer stdin.Close()
-		io.Copy(stdin, r)
-	}()
-
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-
 	var article Article
-	if err := json.NewDecoder(stdout).Decode(&article); err != nil {
+	var parseErr error
+
+	if err := goxp.Exec("node", "readability.js", url).Pipe(
+		func(w io.WriteCloser) {
+			defer w.Close()
+			io.Copy(w, r)
+		},
+		func(r io.ReadCloser) {
+			defer r.Close()
+			if err := json.NewDecoder(r).Decode(&article); err != nil {
+				parseErr = err
+			}
+
+		}, nil).Do(ctx); err != nil {
 		return nil, err
 	}
 
-	if err := cmd.Wait(); err != nil {
-		return nil, err
+	if parseErr != nil {
+		return nil, parseErr
 	}
 
 	return &article, nil
@@ -221,7 +222,7 @@ func (reader *readerService) handleView(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	html, err := executeTemplate("reader.tmpl", map[string]interface{}{
+	html, err := executeTemplate("reader.tmpl", pongo2.Context{
 		"url":        ref.URL,
 		"title":      ref.Title,
 		"content":    ref.Content,
