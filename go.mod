@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
-	github.com/whitekid/goxp v0.0.0-20230102071038-70775b642ade
+	github.com/whitekid/goxp v0.0.0-20230102105235-614f06924925
 	gorm.io/driver/sqlite v1.4.4
 	gorm.io/gorm v1.24.3
 )
