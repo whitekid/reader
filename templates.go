@@ -25,7 +25,7 @@ func executeTemplate(name string, context pongo2.Context) (string, error) {
 
 		content, err := io.ReadAll(fs)
 		if err != nil {
-			return "", errors.Wrapf(err, "fail to read file")
+			return "", errors.Wrapf(err, "fail to read template file")
 		}
 
 		tmpl, err = pongo2.FromBytes(content)
