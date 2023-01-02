@@ -232,6 +232,8 @@ github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQ
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/whitekid/goxp v0.0.0-20230102071038-70775b642ade h1:Ae4ccUT6Ta6mHbxMZOTGNGLtYWRKYvjFYf3jB8wdtN8=
 github.com/whitekid/goxp v0.0.0-20230102071038-70775b642ade/go.mod h1:9IdaSEoaMdaO/7TQnXmGn7zjWnLuhI913ue2NIXGjs0=
+github.com/whitekid/goxp v0.0.0-20230102105235-614f06924925 h1:6D8cI9VZ3VuLqKZdtwNmYiuh73ohp8HwDbx5ETJUi2c=
+github.com/whitekid/goxp v0.0.0-20230102105235-614f06924925/go.mod h1:9IdaSEoaMdaO/7TQnXmGn7zjWnLuhI913ue2NIXGjs0=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
