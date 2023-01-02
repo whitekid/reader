@@ -74,8 +74,8 @@ func init() {
 func cleanURL(url string) string {
 	log.Debugf("before clean url: %s", url)
 
-	fx.ForEach(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
-	fx.ForEach(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
+	fx.Each(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
+	fx.Each(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
 
 	log.Debugf("after clean url: %s", url)
 	return url
