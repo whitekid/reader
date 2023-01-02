@@ -2,9 +2,7 @@ package reader
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -14,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
-	"github.com/whitekid/goxp"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"github.com/whitekid/goxp/service"
@@ -57,44 +54,6 @@ func (reader *readerService) Serve(ctx context.Context) error {
 	}()
 
 	return reader.e.Start(config.BindAddr())
-}
-
-type Article struct {
-	Title       string
-	Byline      string
-	Content     string
-	TextContent string
-	Length      int
-	Excerpt     string
-	SiteName    string
-	Image       string
-	Favicon     string
-}
-
-func readableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
-	var article Article
-	var parseErr error
-
-	if err := goxp.Exec("node", "readability.js", url).Pipe(
-		func(w io.WriteCloser) {
-			defer w.Close()
-			io.Copy(w, r)
-		},
-		func(r io.ReadCloser) {
-			defer r.Close()
-			if err := json.NewDecoder(r).Decode(&article); err != nil {
-				parseErr = err
-			}
-
-		}, nil).Do(ctx); err != nil {
-		return nil, err
-	}
-
-	if parseErr != nil {
-		return nil, parseErr
-	}
-
-	return &article, nil
 }
 
 func (reader *readerService) handleNewURL(c echo.Context) error {
