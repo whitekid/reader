@@ -5,15 +5,15 @@ go 1.20
 require (
 	github.com/flosch/pongo2/v6 v6.0.0
 	github.com/go-testfixtures/testfixtures/v3 v3.8.1
-	github.com/jedib0t/go-pretty/v6 v6.4.4
+	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
-	github.com/stretchr/testify v1.8.1
-	github.com/whitekid/goxp v0.0.0-20230217185520-0e582563483e
+	github.com/stretchr/testify v1.8.2
+	github.com/whitekid/goxp v0.0.0-20230222020744-96e7c2ee24f3
 	gorm.io/driver/sqlite v1.4.4
-	gorm.io/gorm v1.24.5
+	gorm.io/gorm v1.24.6
 )
 
 require (
