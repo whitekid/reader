@@ -23,7 +23,7 @@ var configs = map[string][]flags.Flag{
 var persistentConfigs = map[string][]flags.Flag{
 	"reader": {
 		{keyDatabase, "d", "reader.db", "database"},
-		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0", ""},
+		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", ""},
 	},
 }
 
