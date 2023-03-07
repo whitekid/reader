@@ -63,6 +63,7 @@ func TestNewURL(t *testing.T) {
 	}{
 		{"https://m.blog.naver.com/businessinsight/222719467943", args{}, shortner.Encode(4)},
 		{"https://zdnet.co.kr/view/?no=20090914155953", args{}, shortner.Encode(5)},
+		{"https://www.technologyreview.kr/chatgpt-is-everywhere-heres-where-it-came-from/", args{}, shortner.Encode(6)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
