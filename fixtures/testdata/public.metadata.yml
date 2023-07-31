@@ -1,0 +1,6 @@
+- created_at: 2023-07-31T16:04:40.064068+09:00
+  deleted_at: null
+  id: 1
+  key: schema_version
+  updated_at: 2023-07-31T16:04:40.064068+09:00
+  value: "1"

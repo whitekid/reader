@@ -19,7 +19,7 @@ type Article struct {
 	SiteName    string
 }
 
-func readableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
+func ReadableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
 	var article Article
 	var parseErr error
 

@@ -3,12 +3,19 @@ package db
 import (
 	"context"
 
+	"reader/models"
+
 	"github.com/pkg/errors"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 )
 
-func migrate(ctx context.Context) error {
+func Migrate(ctx context.Context) error {
+	log.Debug("migrating databases....")
+	if err := db.AutoMigrate(models.Refs...); err != nil {
+		return err
+	}
+
 	migFuncs := map[uint]func(ctx context.Context) error{
 		1: migrate_v1,
 	}
@@ -44,8 +51,8 @@ func migrate_v1(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		if !resp.Success() {
-			return errors.Errorf("failed with %d, url=%s", resp.StatusCode, url.URL)
+		if err := resp.Success(); err != nil {
+			return errors.Wrap(err, url.URL)
 		}
 
 		url.OriginalContent = resp.String()
