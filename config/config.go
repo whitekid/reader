@@ -9,7 +9,10 @@ import (
 const (
 	keyBind         = "bind_addr"
 	keySlugEncoding = "slug_encoding"
-	keyDatabase     = "database"
+	keyDBHost       = "db_host"
+	keyDBName       = "db_name"
+	keyDBUser       = "db_user"
+	keyDBPasswd     = "db_passwd"
 	keyUserAgent    = "user-agent"
 )
 
@@ -22,8 +25,8 @@ var configs = map[string][]flags.Flag{
 
 var persistentConfigs = map[string][]flags.Flag{
 	"reader": {
-		{keyDatabase, "d", "reader.db", "database"},
 		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", ""},
+		{keyDBHost, "H", "localhost", "database host"},
 	},
 }
 
@@ -34,17 +37,20 @@ func init() {
 	v.SetEnvPrefix("rd")
 	v.AutomaticEnv()
 
-	flags.InitDefaults(nil, configs)
-	flags.InitDefaults(nil, persistentConfigs)
+	flags.InitDefaults(v, configs)
+	flags.InitDefaults(v, persistentConfigs)
 }
 
 func InitFlagSet(use string, cmd *cobra.Command) {
-	flags.InitFlagSet(nil, configs, use, cmd.Flags())
-	flags.InitFlagSet(nil, persistentConfigs, use, cmd.PersistentFlags())
+	flags.InitFlagSet(v, configs, use, cmd.Flags())
+	flags.InitFlagSet(v, persistentConfigs, use, cmd.PersistentFlags())
 }
 
 func BindAddr() string { return v.GetString(keyBind) }
 func Encoding() string { return v.GetString(keySlugEncoding) }
 
-func Database() string  { return v.GetString(keyDatabase) }
+func DBName() string    { return v.GetString(keyDBName) }
+func DBUser() string    { return v.GetString(keyDBUser) }
+func DBPasswd() string  { return v.GetString(keyDBPasswd) }
+func DBHost() string    { return v.GetString(keyDBHost) }
 func UserAgent() string { return v.GetString(keyUserAgent) }
