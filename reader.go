@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
 	"github.com/whitekid/goxp/log"
-	"github.com/whitekid/goxp/request"
+	"github.com/whitekid/goxp/requests"
 	"github.com/whitekid/goxp/service"
 	"gorm.io/gorm"
 
@@ -80,9 +80,9 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 			return nil, errors.Wrapf(err, "fail to save url: %s", url)
 		}
 
-		resp, err := request.Get(url).
+		resp, err := requests.Get(url).
 			FollowRedirect(true).
-			Header(request.HeaderUserAgent, config.UserAgent()).
+			Header(requests.HeaderUserAgent, config.UserAgent()).
 			Do(ctx)
 		if err != nil {
 			return nil, err
@@ -124,9 +124,9 @@ func UpdateURL(ctx context.Context, idOrShorten string) (*models.URL, error) {
 		return nil, err
 	}
 
-	resp, err := request.Get(urlRef.URL).
+	resp, err := requests.Get(urlRef.URL).
 		FollowRedirect(true).
-		Header(request.HeaderUserAgent, config.UserAgent()).
+		Header(requests.HeaderUserAgent, config.UserAgent()).
 		Do(ctx)
 	if err != nil {
 		return nil, err

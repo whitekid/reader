@@ -27,15 +27,15 @@ jobs:
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "stable"
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: latest
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: install raadability
         run: npm i
