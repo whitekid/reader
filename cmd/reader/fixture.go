@@ -9,7 +9,6 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/whitekid/cobrax"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/request"
 	"gopkg.in/yaml.v3"
@@ -23,7 +22,7 @@ func init() {
 		Use: "fixtures",
 	}
 
-	cobrax.Add(cmd, &cobra.Command{
+	cmd.AddCommand(&cobra.Command{
 		Use:   "setup",
 		Short: "setup fixture database",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -76,7 +75,7 @@ func init() {
 
 			return db.DumpFixture()
 		},
-	}, nil, nil)
+	})
 
 	cmd.AddCommand(&cobra.Command{
 		Use: "dump database",
