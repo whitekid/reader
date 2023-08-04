@@ -5,3 +5,14 @@
 ## bookmarklet
 
     javascript: (() => { location.href="https://reader.woosum.net/read/" + location.href ; })();
+
+## Setup
+
+setup potgresql database
+
+    CREATE USER reader_user WITH PASSWORD 'reader_pass';
+    CREATE DATABASE reader_test OWNER reader_user;
+
+migrate with pgloader
+
+    pgloader reader.db pgsql://reader_user:reader_pass@localhost/reader_test

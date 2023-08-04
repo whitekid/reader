@@ -12,7 +12,6 @@ import (
 	"github.com/whitekid/goxp/request"
 
 	"reader/db"
-	"reader/testutils"
 )
 
 func must(err error) {
@@ -22,10 +21,10 @@ func must(err error) {
 }
 
 func TestMain(m *testing.M) {
-	db, err := db.Open("test.db")
+	db_, err := db.Open()
 	must(err)
 
-	testutils.SetupFixtureDatabase(db)
+	db.SetupFixtureDatabase(db_)
 
 	os.Exit(m.Run())
 }
@@ -57,28 +56,30 @@ func TestNewURL(t *testing.T) {
 	type args struct {
 	}
 	tests := [...]struct {
-		name     string
-		args     args
-		wantSlug string
+		name string
+		args args
 	}{
-		{"https://m.blog.naver.com/businessinsight/222719467943", args{}, shortner.Encode(4)},
-		{"https://zdnet.co.kr/view/?no=20090914155953", args{}, shortner.Encode(5)},
-		{"https://www.technologyreview.kr/chatgpt-is-everywhere-heres-where-it-came-from/", args{}, shortner.Encode(6)},
+		{"https://m.blog.naver.com/businessinsight/222719467943", args{}},
+		{"https://zdnet.co.kr/view/?no=20090914155953", args{}},
+		{"https://www.technologyreview.kr/chatgpt-is-everywhere-heres-where-it-came-from/", args{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resp, err := request.Get(ts.URL + "/read/" + tt.name).FollowRedirect(false).Do(ctx)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusFound, resp.StatusCode)
-			require.Equal(t, "/r/"+tt.wantSlug, resp.Header.Get(request.HeaderLocation))
+			loc := resp.Header.Get(request.HeaderLocation)
+			require.NotEmpty(t, loc)
 
 			{
-				resp, err := request.Get(ts.URL + resp.Header.Get(request.HeaderLocation)).Do(ctx)
+				resp, err := request.Get(ts.URL + loc).Do(ctx)
 				require.NoError(t, err)
-				require.True(t, resp.Success())
+				require.NoError(t, resp.Success())
 			}
+
+			slug := loc[3:] // /r/xxx
 			{
-				id, err := shortner.Decode(tt.wantSlug)
+				id, err := shortner.Decode(slug)
 				require.NoError(t, err)
 				got, err := db.URL.ByID(uint(id))
 				require.NoError(t, err)

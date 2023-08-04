@@ -88,12 +88,12 @@ func AddURL(ctx context.Context, url string) (*models.URL, error) {
 			return nil, err
 		}
 
-		if !resp.Success() {
-			return nil, errors.Errorf("failed with %d, url=%s", resp.StatusCode, url)
+		if err := resp.Success(); err != nil {
+			return nil, errors.Wrap(err, url)
 		}
 
 		body := resp.String()
-		r, err := readableArticle(ctx, strings.NewReader(body), url)
+		r, err := ReadableArticle(ctx, strings.NewReader(body), url)
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -132,12 +132,12 @@ func UpdateURL(ctx context.Context, idOrShorten string) (*models.URL, error) {
 		return nil, err
 	}
 
-	if !resp.Success() {
-		return nil, errors.Errorf("failed with %d, url=%s", resp.StatusCode, urlRef.URL)
+	if err := resp.Success(); err != nil {
+		return nil, errors.Wrap(err, urlRef.URL)
 	}
 
 	body := resp.String()
-	r, err := readableArticle(ctx, strings.NewReader(body), urlRef.URL)
+	r, err := ReadableArticle(ctx, strings.NewReader(body), urlRef.URL)
 	if err != nil {
 		log.Error(err)
 		return nil, err

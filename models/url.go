@@ -11,13 +11,13 @@ func init() {
 type URL struct {
 	gorm.Model
 
-	URL             string `gorm:"index:,unique,where deleted_at is not null" json:"url"`
-	OriginalContent string `json:"originalContent"`
-	Title           string `json:"title"`
+	URL             string `gorm:"type:varchar(1000);index:,unique,where deleted_at is not null" json:"url"`
+	OriginalContent string	// TODO 이거 뭐지?
+	Title           string `gorm:"type:varchar(1000);"`
 	Content         string
 	TextContent     string
 	Length          int
 	Excerpt         string
-	SiteName        string
-	ByLine          string
+	SiteName        string `gorm:"type:varchar(100);"`
+	ByLine          string `gorm:"type:varchar(100);"`
 }
