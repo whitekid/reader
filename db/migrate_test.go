@@ -6,21 +6,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"reader/testutils"
 )
 
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func TestMain(m *testing.M) {
-	sqlDB, err := Open("test.db")
+	sqlDB, err := Open()
 	must(err)
 
-	testutils.SetupFixtureDatabase(sqlDB)
+	SetupFixtureDatabase(sqlDB)
 	os.Exit(m.Run())
 }
 
@@ -30,6 +22,6 @@ func TestMigrateV1(t *testing.T) {
 
 	noContents, _ := URL.noOrignalContent()
 	require.NotEqual(t, 0, len(noContents))
-	require.NoError(t, migrate(context.Background()))
+	require.NoError(t, Migrate(context.Background()))
 	require.Equal(t, uint(1), Metadata.SchemaVersion())
 }
