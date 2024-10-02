@@ -1,5 +1,7 @@
-FROM golang:1.19-alpine AS builder
-RUN apk add --no-cache make \
+FROM golang:1.23-alpine AS builder
+RUN --mount=type=cache,id=go.pkg,target=/go/pkg/mod \
+    --mount=type=cache,id=go.build,target=/root/.cache/go-build \
+	apk add --no-cache make \
     gcc musl-dev
 WORKDIR /go/src
 COPY . /go/src

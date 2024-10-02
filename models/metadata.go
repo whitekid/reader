@@ -10,6 +10,6 @@ func init() {
 type Metadata struct {
 	gorm.Model
 
-	Key   string `gorm:"index:,unique,where deleted_at is not null"`
-	Value string
+	Key   string `gorm:"type:text;index,unique,where:deleted_at is not null"`
+	Value string `gorm:"type:text"`
 }

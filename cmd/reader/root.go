@@ -19,7 +19,9 @@ var rootCmd = &cobra.Command{
 
 		return nil
 	},
-	RunE:         func(cmd *cobra.Command, args []string) error { return reader.Run(cmd.Context()) },
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return reader.Run(cmd.Context())
+	},
 	SilenceUsage: true,
 }
 
@@ -28,21 +30,9 @@ func init() {
 
 	fs := rootCmd.PersistentFlags()
 	flags.String(fs, config.KeyBindAddr, "bind", "B", "127.0.0.1:8000", "bind address")
-	flags.String(fs, config.KeySlugEncoding, "", "s", "", "slug encoding")
-	flags.String(fs, config.KeyUserAgent, "", "A", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", "user agent")
-	flags.String(fs, config.KeyDBHost, "", "H", "localhost", "database host")
-
-	// 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	// 	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	// 	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
-	// 	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
-	// 	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	// 	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	// 	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	// 	viper.SetDefault("license", "apache")
-
-	// rootCmd.AddCommand(addCmd)
-	// rootCmd.AddCommand(initCmd)
+	flags.String(fs, config.KeySlugEncoding, "slug-encoding", "s", "", "slug encoding")
+	flags.String(fs, config.KeyUserAgent, "user-agent", "A", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", "user agent")
+	flags.String(fs, config.KeyDBHost, "db-host", "H", "localhost", "database host")
 }
 
 func initConfig() {
