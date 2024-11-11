@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/whitekid/goxp/log"
 	"github.com/whitekid/goxp/requests"
-	"github.com/whitekid/goxp/service"
+	"github.com/whitekid/goxp/services"
 	"gorm.io/gorm"
 
 	"reader/config"
@@ -30,7 +30,7 @@ type readerService struct {
 	e *echo.Echo
 }
 
-var _ service.Interface = service.Interface(nil)
+var _ services.Interface = services.Interface(nil)
 
 func newReaderService() *readerService {
 	r := &readerService{
