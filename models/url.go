@@ -11,9 +11,9 @@ func init() {
 type URL struct {
 	gorm.Model
 
-	URL             string `gorm:"type:varchar(1000);index:,unique,where deleted_at is not null" json:"url"`
-	OriginalContent string	// TODO 이거 뭐지?
-	Title           string `gorm:"type:varchar(1000);"`
+	URL             string `gorm:"type:varchar(1000);index:,unique,where:deleted_at is not null" json:"url"`
+	OriginalContent string
+	Title           string `gorm:"type:varchar(1000)"`
 	Content         string
 	TextContent     string
 	Length          int

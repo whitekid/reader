@@ -3,8 +3,8 @@ package reader
 import (
 	"regexp"
 
-	"github.com/whitekid/goxp/fx"
 	"github.com/whitekid/goxp/log"
+	"github.com/whitekid/goxp/slicex"
 )
 
 // from clearurls global rules
@@ -59,11 +59,11 @@ type redirectMap struct {
 }
 
 func init() {
-	removeRuleExps = fx.Map(removeRules, func(rule string) *regexp.Regexp {
+	removeRuleExps = slicex.Map(removeRules, func(rule string) *regexp.Regexp {
 		return regexp.MustCompile(rule + `\=[a-zA-Z0-9_]+&{0,1}`)
 	})
 
-	redirectRuleExps = fx.Map(redirectRules, func(rules []string) *redirectMap {
+	redirectRuleExps = slicex.Map(redirectRules, func(rules []string) *redirectMap {
 		return &redirectMap{
 			Regex: regexp.MustCompile(rules[0]),
 			Repl:  rules[1],
@@ -74,8 +74,8 @@ func init() {
 func cleanURL(url string) string {
 	log.Debugf("before clean url: %s", url)
 
-	fx.Each(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
-	fx.Each(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
+	slicex.Each(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
+	slicex.Each(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
 
 	log.Debugf("after clean url: %s", url)
 	return url

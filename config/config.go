@@ -1,56 +1,45 @@
 package config
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"github.com/whitekid/goxp/flags"
 )
 
 const (
-	keyBind         = "bind_addr"
-	keySlugEncoding = "slug_encoding"
-	keyDBHost       = "db_host"
-	keyDBName       = "db_name"
-	keyDBUser       = "db_user"
-	keyDBPasswd     = "db_passwd"
-	keyUserAgent    = "user-agent"
+	KeyBindAddr     = "bind_addr"
+	KeySlugEncoding = "slug_encoding"
+	KeyDBHost       = "db_host"
+	KeyDBName       = "db_name"
+	KeyDBUser       = "db_user"
+	KeyDBPasswd     = "db_passwd"
+	KeyUserAgent    = "user-agent"
 )
 
-var configs = map[string][]flags.Flag{
-	"reader": {
-		{keyBind, "B", "127.0.0.1:8000", "bind address"},
-		{keySlugEncoding, "s", "", "slug encoding"},
-	},
+func BindAddr() string { return viper.GetString(KeyBindAddr) }
+func Encoding() string { return viper.GetString(KeySlugEncoding) }
+
+func DBName() string    { return viper.GetString(KeyDBName) }
+func DBUser() string    { return viper.GetString(KeyDBUser) }
+func DBPasswd() string  { return viper.GetString(KeyDBPasswd) }
+func DBHost() string    { return viper.GetString(KeyDBHost) }
+func UserAgent() string { return viper.GetString(KeyUserAgent) }
+
+func InitFlags(fs *pflag.FlagSet) {
+	// flags.String(fs, KeyBindAddr, "bind", "B", "127.0.0.1:8000", "bind address")
+	// flags.String(fs, KeySlugEncoding, "slug-encoding", "s", "", "slug encoding")
+	// flags.String(fs, KeyUserAgent, "user-agent", "A", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", "user agent")
+	// flags.String(fs, KeyDBHost, "host", "H", "localhost", "database host")
 }
 
-var persistentConfigs = map[string][]flags.Flag{
-	"reader": {
-		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", ""},
-		{keyDBHost, "H", "localhost", "database host"},
-	},
+func String(flags *pflag.FlagSet, key string, name string, shorthand string, value string, usage string) (r *string) {
+	r = flags.StringP(name, shorthand, value, usage)
+	viper.BindPFlag(key, flags.Lookup(name))
+
+	return
 }
 
-var v *viper.Viper
 
 func init() {
-	v = viper.GetViper()
-	v.SetEnvPrefix("rd")
-	v.AutomaticEnv()
-
-	flags.InitDefaults(v, configs)
-	flags.InitDefaults(v, persistentConfigs)
+	viper.SetEnvPrefix("rd")
+	viper.AutomaticEnv()
 }
-
-func InitFlagSet(use string, cmd *cobra.Command) {
-	flags.InitFlagSet(v, configs, use, cmd.Flags())
-	flags.InitFlagSet(v, persistentConfigs, use, cmd.PersistentFlags())
-}
-
-func BindAddr() string { return v.GetString(keyBind) }
-func Encoding() string { return v.GetString(keySlugEncoding) }
-
-func DBName() string    { return v.GetString(keyDBName) }
-func DBUser() string    { return v.GetString(keyDBUser) }
-func DBPasswd() string  { return v.GetString(keyDBPasswd) }
-func DBHost() string    { return v.GetString(keyDBHost) }
-func UserAgent() string { return v.GetString(keyUserAgent) }

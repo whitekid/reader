@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/whitekid/goxp/request"
+	"github.com/whitekid/goxp/requests"
 
 	"reader/db"
 )
@@ -65,14 +65,14 @@ func TestNewURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := request.Get(ts.URL + "/read/" + tt.name).FollowRedirect(false).Do(ctx)
+			resp, err := requests.Get(ts.URL + "/read/" + tt.name).FollowRedirect(false).Do(ctx)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusFound, resp.StatusCode)
-			loc := resp.Header.Get(request.HeaderLocation)
+			loc := resp.Header.Get(requests.HeaderLocation)
 			require.NotEmpty(t, loc)
 
 			{
-				resp, err := request.Get(ts.URL + loc).Do(ctx)
+				resp, err := requests.Get(ts.URL + loc).Do(ctx)
 				require.NoError(t, err)
 				require.NoError(t, resp.Success())
 			}
@@ -107,7 +107,7 @@ func TestNewURLError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, err := request.Get(ts.URL + "/read/" + tt.args.url).Do(ctx)
+			resp, err := requests.Get(ts.URL + "/read/" + tt.args.url).Do(ctx)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 		})
@@ -120,7 +120,7 @@ func TestViewByID(t *testing.T) {
 
 	ts := newTestServer(ctx)
 
-	resp, err := request.Get(ts.URL + "/r/1").FollowRedirect(false).Do(ctx)
+	resp, err := requests.Get(ts.URL + "/r/1").FollowRedirect(false).Do(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusFound, resp.StatusCode)
 	require.Equal(t, "/r/"+shortner.Encode(1), resp.Header.Get("Location"))
@@ -132,7 +132,7 @@ func TestRandomView(t *testing.T) {
 
 	ts := newTestServer(ctx)
 
-	resp, err := request.Get(ts.URL + "/").FollowRedirect(false).Do(ctx)
+	resp, err := requests.Get(ts.URL + "/").FollowRedirect(false).Do(ctx)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusFound, resp.StatusCode)
 	require.NotEqual(t, "", resp.Header.Get(echo.HeaderLocation))

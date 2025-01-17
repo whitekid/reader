@@ -19,6 +19,10 @@ type Article struct {
 	SiteName    string
 }
 
+func ReadableArticleEx(ctx context.Context, r io.Reader, url string) (*Article, error) {
+	panic("Not Implemented")
+}
+
 func ReadableArticle(ctx context.Context, r io.Reader, url string) (*Article, error) {
 	var article Article
 	var parseErr error

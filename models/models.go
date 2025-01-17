@@ -1,5 +1,5 @@
 package models
 
 var (
-	Refs []interface{}
+	Refs []any
 )
