@@ -21,14 +21,9 @@ export function renderReader(article: Article): string {
 <body>
   <div class="toolbar">
     <a href="/">← Back</a>
-    <div style="display: flex; gap: 8px;">
-      <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-        <button type="button" style="background: #666; cursor: pointer;">🔗 Open Original</button>
-      </a>
-      <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
-        <button type="submit">✓ Mark as Read</button>
-      </form>
-    </div>
+    <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
+      <button type="submit">✓ Mark as Read</button>
+    </form>
   </div>
 
   <div class="container">
@@ -36,7 +31,7 @@ export function renderReader(article: Article): string {
 
     <div class="meta">
       ${article.author ? `by ${escapeHtml(article.author)} • ` : ''}
-      ${article.site_name ? escapeHtml(article.site_name) : ''} •
+      ${article.site_name ? `<a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${escapeHtml(article.site_name)}</a>` : ''} •
       ${article.reading_time} min read
     </div>
 
