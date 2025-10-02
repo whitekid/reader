@@ -14,15 +14,20 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
   try {
     // Parse form data
     const formData = await request.formData();
-    const url = formData.get('url');
+    const urlValue = formData.get('url');
 
-    if (!url) {
+    if (!urlValue || typeof urlValue !== 'string') {
       return new Response('URL is required', { status: 400 });
     }
 
-    // Validate URL format
+    const url = urlValue.trim();
+
+    // Validate URL format (must be absolute URL with protocol)
     try {
-      new URL(url);
+      const parsed = new URL(url);
+      if (!parsed.protocol.startsWith('http')) {
+        return new Response('URL must start with http:// or https://', { status: 400 });
+      }
     } catch {
       return new Response('Invalid URL format', { status: 400 });
     }
