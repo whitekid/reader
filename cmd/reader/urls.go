@@ -16,9 +16,9 @@ import (
 )
 
 func init() {
-	cmd := &cobra.Command{
+	cmd := cobrax.Add(rootCmd, &cobra.Command{
 		Use: "urls",
-	}
+	}, nil)
 
 	cobrax.Add(cmd, &cobra.Command{
 		Use:   "new url",
@@ -107,6 +107,4 @@ func init() {
 			return nil
 		},
 	}, nil)
-
-	cobrax.Add(rootCmd, cmd, nil)
 }
