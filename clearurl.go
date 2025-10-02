@@ -3,7 +3,6 @@ package reader
 import (
 	"regexp"
 
-	"github.com/whitekid/goxp/fx"
 	"github.com/whitekid/goxp/log"
 )
 
@@ -59,23 +58,29 @@ type redirectMap struct {
 }
 
 func init() {
-	removeRuleExps = fx.Map(removeRules, func(rule string) *regexp.Regexp {
-		return regexp.MustCompile(rule + `\=[a-zA-Z0-9_]+&{0,1}`)
-	})
+	removeRuleExps = make([]*regexp.Regexp, len(removeRules))
+	for i, rule := range removeRules {
+		removeRuleExps[i] = regexp.MustCompile(rule + `\=[a-zA-Z0-9_]+&{0,1}`)
+	}
 
-	redirectRuleExps = fx.Map(redirectRules, func(rules []string) *redirectMap {
-		return &redirectMap{
+	redirectRuleExps = make([]*redirectMap, len(redirectRules))
+	for i, rules := range redirectRules {
+		redirectRuleExps[i] = &redirectMap{
 			Regex: regexp.MustCompile(rules[0]),
 			Repl:  rules[1],
 		}
-	})
+	}
 }
 
 func cleanURL(url string) string {
 	log.Debugf("before clean url: %s", url)
 
-	fx.Each(removeRuleExps, func(_ int, exp *regexp.Regexp) { url = exp.ReplaceAllString(url, "") })
-	fx.Each(redirectRuleExps, func(_ int, rd *redirectMap) { url = rd.Regex.ReplaceAllString(url, rd.Repl) })
+	for _, exp := range removeRuleExps {
+		url = exp.ReplaceAllString(url, "")
+	}
+	for _, rd := range redirectRuleExps {
+		url = rd.Regex.ReplaceAllString(url, rd.Repl)
+	}
 
 	log.Debugf("after clean url: %s", url)
 	return url

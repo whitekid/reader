@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/whitekid/goxp/fx"
 )
 
 func TestRandomURL(t *testing.T) {
@@ -17,6 +16,10 @@ func TestRandomURL(t *testing.T) {
 		ids = append(ids, int(u1.ID))
 	}
 
-	uniq := fx.Distinct(ids)
-	require.NotEqual(t, uniq, ids)
+	// Check if there are duplicates (random should give different results)
+	seen := make(map[int]bool)
+	for _, id := range ids {
+		seen[id] = true
+	}
+	require.NotEqual(t, len(seen), len(ids))
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/whitekid/cobrax"
+	"github.com/whitekid/goxp/cobrax"
 
 	"reader/db"
 )
@@ -18,5 +18,5 @@ func init() {
 
 			return nil
 		},
-	}, nil, nil)
+	}, nil)
 }
