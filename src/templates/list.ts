@@ -21,7 +21,7 @@ export function renderList(articles: Article[], isFavoritesMode = false): string
 </head>
 <body>
   <div class="toolbar">
-    <h1 style="margin: 0; font-size: 20px;">📚 Reader ${isFavoritesMode ? '- ★ Favorites' : ''}</h1>
+    <h1 style="margin: 0; font-size: 20px;">📚 Reader</h1>
     <div style="display: flex; gap: 10px;">
       <a href="/" style="${!isFavoritesMode ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">All</a>
       <a href="/favorites" style="${isFavoritesMode ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">★ Favorites</a>
