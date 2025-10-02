@@ -19,9 +19,9 @@ import (
 )
 
 func init() {
-	cmd := &cobra.Command{
+	cmd := cobrax.Add(rootCmd, &cobra.Command{
 		Use: "fixtures",
-	}
+	}, nil)
 
 	cobrax.Add(cmd, &cobra.Command{
 		Use:   "setup",
@@ -99,6 +99,4 @@ func init() {
 			return nil
 		},
 	}, nil)
-
-	cobrax.Add(rootCmd, cmd, nil)
 }

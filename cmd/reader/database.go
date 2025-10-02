@@ -15,7 +15,6 @@ func init() {
 			if err := db.Migrate(cmd.Context()); err != nil {
 				return err
 			}
-
 			return nil
 		},
 	}, nil)
