@@ -12,15 +12,31 @@ import type { Env } from '../types.js';
  */
 export async function handlePost(request: Request, env: Env): Promise<Response> {
   try {
-    // Parse form data
-    const formData = await request.formData();
-    const urlValue = formData.get('url');
+    let url: string | null = null;
 
-    if (!urlValue || typeof urlValue !== 'string') {
-      return new Response('URL is required', { status: 400 });
+    // Method 1: Query string (?url=...)
+    const reqUrl = new URL(request.url);
+    url = reqUrl.searchParams.get('url');
+
+    // Method 2: Form data
+    if (!url) {
+      const formData = await request.formData();
+      const urlValue = formData.get('url');
+      if (urlValue && typeof urlValue === 'string') {
+        url = urlValue;
+      }
     }
 
-    const url = urlValue.trim();
+    // Method 3: Referer header
+    if (!url) {
+      url = request.headers.get('Referer');
+    }
+
+    if (!url) {
+      return new Response('URL is required (use ?url=..., form data, or Referer header)', { status: 400 });
+    }
+
+    url = url.trim();
 
     // Validate URL format (must be absolute URL with protocol)
     try {
