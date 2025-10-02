@@ -16,6 +16,7 @@ export function renderReader(article: Article): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(article.title)} - Reader</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>${styles}</style>
 </head>
 <body>
@@ -23,6 +24,9 @@ export function renderReader(article: Article): string {
     <a href="/">← Back</a>
     <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
       <button type="submit">✓ Mark as Read</button>
+    </form>
+    <form method="POST" action="/favorite/${article.id}" style="margin: 0;">
+      <button type="submit">${article.is_favorite ? '★' : '☆'} Favorite</button>
     </form>
   </div>
 

@@ -15,6 +15,26 @@ function isNaverBlog(url: string): boolean {
 }
 
 /**
+ * Check if URL is Brunch
+ */
+function isBrunch(url: string): boolean {
+  return url.includes('brunch.co.kr');
+}
+
+/**
+ * Remove auto_login parameter from Brunch URLs to avoid redirect loops
+ */
+function cleanBrunchUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.delete('auto_login');
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+}
+
+/**
  * Convert Naver Blog URL to PostView URL for direct content access
  */
 function convertToNaverPostViewUrl(url: string): string {
@@ -77,14 +97,26 @@ function extractNaverBlogContent(document: any): { content: string; excerpt: str
  */
 export async function extractContent(url: string): Promise<ExtractedContent> {
   try {
+    // Clean Brunch URLs to avoid login redirect loops
+    if (isBrunch(url)) {
+      url = cleanBrunchUrl(url);
+    }
+
     // Fetch HTML with proper headers
+    // For Brunch, use manual redirect to avoid login loops
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
       },
+      redirect: isBrunch(url) ? 'manual' : 'follow',
     });
+
+    // Handle redirects for Brunch (3xx responses with manual redirect)
+    if (isBrunch(url) && response.status >= 300 && response.status < 400) {
+      throw new Error('Brunch article requires login. Please try a different URL or access directly.');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

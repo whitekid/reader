@@ -85,3 +85,41 @@ export async function deleteArticle(db: D1Database, id: number): Promise<boolean
 
   return result.success;
 }
+
+export async function getFavoriteArticles(db: D1Database, limit = 50): Promise<Article[]> {
+  const result = await db
+    .prepare('SELECT * FROM articles WHERE is_favorite = 1 ORDER BY created_at DESC LIMIT ?')
+    .bind(limit)
+    .all<Article>();
+
+  return result.results || [];
+}
+
+export async function toggleFavorite(db: D1Database, id: number): Promise<boolean> {
+  // Get current favorite status
+  const article = await db
+    .prepare('SELECT is_favorite FROM articles WHERE id = ?')
+    .bind(id)
+    .first<{ is_favorite: number }>();
+
+  if (!article) {
+    return false;
+  }
+
+  // Toggle the favorite status
+  const newValue = article.is_favorite ? 0 : 1;
+  const result = await db
+    .prepare('UPDATE articles SET is_favorite = ? WHERE id = ?')
+    .bind(newValue, id)
+    .run();
+
+  return result.success;
+}
+
+export async function getRandomFavorite(db: D1Database): Promise<Article | null> {
+  const result = await db
+    .prepare('SELECT * FROM articles WHERE is_favorite = 1 ORDER BY RANDOM() LIMIT 1')
+    .first<Article>();
+
+  return result || null;
+}

@@ -6,21 +6,27 @@ import { styles } from './styles.js';
 import type { Article } from '../types.js';
 
 /**
- * Render list of unread articles
+ * Render list of articles
  */
-export function renderList(articles: Article[]): string {
+export function renderList(articles: Article[], isFavoritesMode = false): string {
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reader - Unread Articles</title>
+  <title>Reader - ${isFavoritesMode ? 'Favorites' : 'Unread Articles'}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>${styles}</style>
 </head>
 <body>
   <div class="toolbar">
-    <h1 style="margin: 0; font-size: 20px;">📚 Reader</h1>
+    <h1 style="margin: 0; font-size: 20px;">📚 Reader ${isFavoritesMode ? '- ★ Favorites' : ''}</h1>
+    <div style="display: flex; gap: 10px;">
+      <a href="/" style="${!isFavoritesMode ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">All</a>
+      <a href="/favorites" style="${isFavoritesMode ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">★ Favorites</a>
+      <a href="/random" style="margin-left: 10px; color: var(--text-secondary);">🎲 Random</a>
+    </div>
   </div>
 
   <div class="container">
@@ -36,7 +42,7 @@ export function renderList(articles: Article[]): string {
       </form>
     </div>
 
-    ${articles.length === 0 ? renderEmptyState() : renderArticles(articles)}
+    ${articles.length === 0 ? renderEmptyState(isFavoritesMode) : renderArticles(articles)}
   </div>
 </body>
 </html>
@@ -66,11 +72,11 @@ function renderArticles(articles: Article[]): string {
 /**
  * Render empty state when no articles
  */
-function renderEmptyState(): string {
+function renderEmptyState(isFavoritesMode: boolean): string {
   return `
     <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
-      <p style="font-size: 18px; margin-bottom: 12px;">No unread articles</p>
-      <p>Add a URL above to get started</p>
+      <p style="font-size: 18px; margin-bottom: 12px;">${isFavoritesMode ? 'No favorite articles' : 'No unread articles'}</p>
+      <p>${isFavoritesMode ? 'Mark articles as favorite to see them here' : 'Add a URL above to get started'}</p>
     </div>
   `;
 }
