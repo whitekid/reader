@@ -9,9 +9,9 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/whitekid/cobrax"
+	"github.com/whitekid/goxp/cobrax"
 	"github.com/whitekid/goxp/log"
-	"github.com/whitekid/goxp/request"
+	"github.com/whitekid/goxp/requests"
 	"gopkg.in/yaml.v3"
 
 	"reader/db"
@@ -53,7 +53,7 @@ func init() {
 
 			for _, url := range fixture.Urls {
 				log.Infof("fetching %s...", url)
-				resp, err := request.Get(url).FollowRedirect(true).Do(cmd.Context())
+				resp, err := requests.Get(url).FollowRedirect(true).Do(cmd.Context())
 				if err != nil {
 					return nil
 				}
@@ -76,9 +76,9 @@ func init() {
 
 			return db.DumpFixture()
 		},
-	}, nil, nil)
+	}, nil)
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use: "dump database",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			sqlDB, _ := db.SqlDB()
@@ -98,7 +98,7 @@ func init() {
 
 			return nil
 		},
-	})
+	}, nil)
 
-	rootCmd.AddCommand(cmd)
+	cobrax.Add(rootCmd, cmd, nil)
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/whitekid/goxp/log"
-	"github.com/whitekid/goxp/request"
+	"github.com/whitekid/goxp/requests"
 )
 
 func Migrate(ctx context.Context) error {
@@ -47,7 +47,7 @@ func migrate_v1(ctx context.Context) error {
 
 	for _, url := range urls {
 		log.Infof("getting... %d %s", url.ID, url.URL)
-		resp, err := request.Get(url.URL).FollowRedirect(true).Do(ctx)
+		resp, err := requests.Get(url.URL).FollowRedirect(true).Do(ctx)
 		if err != nil {
 			return err
 		}

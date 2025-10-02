@@ -1,9 +1,7 @@
 package config
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/whitekid/goxp/flags"
 )
 
 const (
@@ -16,20 +14,6 @@ const (
 	keyUserAgent    = "user-agent"
 )
 
-var configs = map[string][]flags.Flag{
-	"reader": {
-		{keyBind, "B", "127.0.0.1:8000", "bind address"},
-		{keySlugEncoding, "s", "", "slug encoding"},
-	},
-}
-
-var persistentConfigs = map[string][]flags.Flag{
-	"reader": {
-		{keyUserAgent, "", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0", ""},
-		{keyDBHost, "H", "localhost", "database host"},
-	},
-}
-
 var v *viper.Viper
 
 func init() {
@@ -37,13 +21,11 @@ func init() {
 	v.SetEnvPrefix("rd")
 	v.AutomaticEnv()
 
-	flags.InitDefaults(v, configs)
-	flags.InitDefaults(v, persistentConfigs)
-}
-
-func InitFlagSet(use string, cmd *cobra.Command) {
-	flags.InitFlagSet(v, configs, use, cmd.Flags())
-	flags.InitFlagSet(v, persistentConfigs, use, cmd.PersistentFlags())
+	// Set defaults
+	v.SetDefault(keyBind, "127.0.0.1:8000")
+	v.SetDefault(keySlugEncoding, "")
+	v.SetDefault(keyUserAgent, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0")
+	v.SetDefault(keyDBHost, "localhost")
 }
 
 func BindAddr() string { return v.GetString(keyBind) }

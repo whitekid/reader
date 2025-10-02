@@ -8,6 +8,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
+	"github.com/whitekid/goxp/cobrax"
 	"github.com/whitekid/goxp/log"
 
 	"reader"
@@ -19,7 +20,7 @@ func init() {
 		Use: "urls",
 	}
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use:   "new url",
 		Short: "add new url",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,9 +33,9 @@ func init() {
 
 			return nil
 		},
-	})
+	}, nil)
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use:   "update id",
 		Short: "update url",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -46,9 +47,9 @@ func init() {
 
 			return nil
 		},
-	})
+	}, nil)
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use:   "list",
 		Short: "list urls",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -66,9 +67,9 @@ func init() {
 			t.Render()
 			return nil
 		},
-	})
+	}, nil)
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use:   "info id",
 		Short: "show url info",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -87,9 +88,9 @@ func init() {
 
 			return nil
 		},
-	})
+	}, nil)
 
-	cmd.AddCommand(&cobra.Command{
+	cobrax.Add(cmd, &cobra.Command{
 		Use:   "delete id...",
 		Short: "delete urls",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -105,7 +106,7 @@ func init() {
 			}
 			return nil
 		},
-	})
+	}, nil)
 
-	rootCmd.AddCommand(cmd)
+	cobrax.Add(rootCmd, cmd, nil)
 }
