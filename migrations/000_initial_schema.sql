@@ -1,5 +1,5 @@
 -- D1 Database Schema for Reader
--- Run: wrangler d1 execute reader --file=schema.sql
+-- Run: wrangler d1 execute reader --file=migrations/000_initial_schema.sql
 
 CREATE TABLE IF NOT EXISTS articles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,12 +13,15 @@ CREATE TABLE IF NOT EXISTS articles (
   word_count INTEGER,
   reading_time INTEGER,      -- Estimated reading time in minutes
   is_read INTEGER DEFAULT 0, -- 0: unread, 1: read
+  is_favorite INTEGER DEFAULT 0, -- 0: normal, 1: favorite
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   read_at DATETIME           -- Timestamp when marked as read
 );
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_is_read ON articles(is_read);
+CREATE INDEX IF NOT EXISTS idx_is_favorite ON articles(is_favorite);
+CREATE INDEX IF NOT EXISTS idx_favorite_created ON articles(is_favorite, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_created_at ON articles(created_at DESC);
 
 -- Future extension: Tags
