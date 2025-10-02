@@ -15,6 +15,39 @@ function isNaverBlog(url: string): boolean {
 }
 
 /**
+ * Convert Naver Blog URL to PostView URL for direct content access
+ */
+function convertToNaverPostViewUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+
+    // Already a PostView URL
+    if (url.includes('PostView.naver')) {
+      return url;
+    }
+
+    // Extract blog ID and log number from path
+    // Format: /blogId/logNo or /PostView.naver?blogId=...&logNo=...
+    const pathMatch = urlObj.pathname.match(/\/([^\/]+)\/(\d+)/);
+    if (pathMatch) {
+      const [, blogId, logNo] = pathMatch;
+      return `https://blog.naver.com/PostView.naver?blogId=${blogId}&logNo=${logNo}`;
+    }
+
+    // Try to extract from query parameters
+    const blogId = urlObj.searchParams.get('blogId');
+    const logNo = urlObj.searchParams.get('logNo');
+    if (blogId && logNo) {
+      return `https://blog.naver.com/PostView.naver?blogId=${blogId}&logNo=${logNo}`;
+    }
+
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+/**
  * Extract content from Naver Blog (special handling)
  */
 function extractNaverBlogContent(document: any): { content: string; excerpt: string } | null {
@@ -64,11 +97,55 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
 
     // Special handling for Naver Blog
     if (isNaverBlog(url)) {
+      // Convert to PostView URL to get actual content (bypasses iframe)
+      const postViewUrl = convertToNaverPostViewUrl(url);
+
+      // If URL was converted, fetch the PostView page
+      if (postViewUrl !== url) {
+        const postViewResponse = await fetch(postViewUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+          },
+        });
+
+        if (postViewResponse.ok) {
+          const postViewHtml = await postViewResponse.text();
+          const { document: postViewDoc } = parseHTML(postViewHtml);
+          const naverContent = extractNaverBlogContent(postViewDoc);
+
+          if (naverContent) {
+            // Extract title from meta or h3
+            const titleElement = postViewDoc.querySelector('meta[property="og:title"]')
+              || postViewDoc.querySelector('.pcol1 h3')
+              || postViewDoc.querySelector('.se-title-text')
+              || postViewDoc.querySelector('title');
+            const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
+
+            const wordCount = estimateWordCount(naverContent.excerpt);
+            const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+            return {
+              title: title.trim(),
+              content: naverContent.content,
+              excerpt: naverContent.excerpt,
+              author: null,
+              siteName: 'blog.naver.com',
+              publishedTime: null,
+              wordCount,
+              readingTime,
+            };
+          }
+        }
+      }
+
+      // Fallback: try extracting from original document
       const naverContent = extractNaverBlogContent(document);
       if (naverContent) {
-        // Extract title from meta or h3
         const titleElement = document.querySelector('meta[property="og:title"]')
           || document.querySelector('.pcol1 h3')
+          || document.querySelector('.se-title-text')
           || document.querySelector('title');
         const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
 
