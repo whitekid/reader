@@ -2,21 +2,10 @@
  * Tests for content extraction service
  */
 
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { extractContent } from './extractor.js';
 
-/**
- * Test helper to create mock fetch response
- */
-function createMockResponse(html: string, status = 200): Response {
-  return new Response(html, {
-    status,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-  });
-}
-
-/**
- * Mock Naver Blog HTML
- */
+// Mock Naver Blog HTML
 const naverBlogHtml = `
 <!DOCTYPE html>
 <html>
@@ -35,9 +24,7 @@ const naverBlogHtml = `
 </html>
 `;
 
-/**
- * Mock standard blog HTML
- */
+// Mock standard blog HTML
 const standardBlogHtml = `
 <!DOCTYPE html>
 <html>
@@ -55,107 +42,119 @@ const standardBlogHtml = `
 </html>
 `;
 
-/**
- * Test cases for content extraction
- */
-const testCases = [
-  {
-    name: 'Naver Blog extraction',
-    url: 'https://blog.naver.com/bizucafe/223886283493',
-    mockHtml: naverBlogHtml,
-    expectedTitle: '테스트 블로그 글 제목',
-    expectedSiteName: 'blog.naver.com',
-    shouldContain: '네이버 블로그 테스트 콘텐츠',
-  },
-  {
-    name: 'Standard blog extraction',
-    url: 'https://example.com/article',
-    mockHtml: standardBlogHtml,
-    expectedTitle: 'Test Article Title',
-    shouldContain: 'test article with enough content',
-  },
-  {
-    name: 'URL normalization with tracking params',
-    url: 'https://blog.naver.com/test/123?utm_source=twitter&trackingCode=rss',
-    normalizedUrl: 'https://blog.naver.com/test/123',
-  },
-];
+beforeEach(() => {
+  vi.restoreAllMocks();
+});
 
-/**
- * Run tests (manual execution for now)
- */
-export async function runTests() {
-  console.log('🧪 Running extraction tests...\n');
+describe('Content Extraction', () => {
+  it('should extract content from Naver Blog', async () => {
+    // Mock fetch to return Naver Blog HTML
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => naverBlogHtml,
+    } as Response);
 
-  for (const test of testCases) {
-    try {
-      console.log(`Testing: ${test.name}`);
-      console.log(`  URL: ${test.url}`);
+    const result = await extractContent('https://blog.naver.com/test/123');
 
-      // Note: This is a conceptual test structure
-      // In actual Cloudflare Workers environment, you would need to:
-      // 1. Mock the global fetch function
-      // 2. Use a test framework like Vitest or Jest
-      // 3. Run tests in a Node.js environment or Workers test environment
+    expect(result.title).toBe('테스트 블로그 글 제목');
+    expect(result.siteName).toBe('blog.naver.com');
+    expect(result.content).toContain('네이버 블로그 테스트 콘텐츠');
+    expect(result.excerpt).toContain('네이버 블로그 테스트 콘텐츠');
+    expect(result.wordCount).toBeGreaterThan(0);
+    expect(result.readingTime).toBeGreaterThan(0);
+  });
 
-      console.log(`  ✅ Test structure defined`);
-      console.log('');
-    } catch (error) {
-      console.log(`  ❌ Error: ${(error as Error).message}`);
-      console.log('');
-    }
-  }
-}
+  it('should extract content from standard blog with Readability', async () => {
+    // Mock fetch to return standard blog HTML
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => standardBlogHtml,
+    } as Response);
 
-/**
- * Expected behavior documentation
- */
-export const expectedBehavior = {
-  naverBlog: {
-    detection: 'URL contains "blog.naver.com"',
-    selectors: ['#postViewArea', '.se-main-container', '#viewTypeSelector', '.post-view'],
-    titleSource: 'meta[property="og:title"] or .pcol1 h3 or title',
-    minContentLength: 100,
-  },
-  standardBlog: {
-    parser: '@mozilla/readability',
-    charThreshold: 100,
-    wordCountCalculation: 'split by whitespace, 200 words per minute',
-  },
-  urlNormalization: {
-    removedParams: [
-      'utm_*', 'fbclid', 'gclid', 'twclid',
-      'trackingCode', 'trackingId', 'fromRss',
-      'ref', 'source', 'campaign', 'medium'
-    ],
-  },
-};
+    const result = await extractContent('https://example.com/article');
 
-/**
- * Integration test instructions
- */
-export const integrationTestGuide = `
-## Manual Integration Testing
+    // Readability uses <title> tag by default
+    expect(result.title).toBe('Standard Blog Post');
+    expect(result.content).toContain('test article with enough content');
+    expect(result.wordCount).toBeGreaterThan(0);
+    expect(result.readingTime).toBeGreaterThan(0);
+  });
 
-### Test Naver Blog
-1. POST /post with URL: https://blog.naver.com/bizucafe/223886283493
-2. Verify title extracted correctly from og:title meta tag
-3. Verify content extracted from #postViewArea
-4. Verify site_name is "blog.naver.com"
+  it('should throw error for HTTP error response', async () => {
+    // Mock fetch to return 404
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    } as Response);
 
-### Test Standard Blog
-1. POST /post with URL from standard blog platform
-2. Verify Readability extraction works
-3. Verify word count and reading time calculated
+    await expect(extractContent('https://example.com/notfound')).rejects.toThrow('HTTP 404');
+  });
 
-### Test URL Normalization
-1. POST /post?url=https://example.com?utm_source=test&trackingCode=rss
-2. Verify stored URL has no tracking parameters
-3. Verify duplicate detection works with normalized URLs
+  it('should throw error when content extraction fails', async () => {
+    // Mock fetch to return empty HTML
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '<html><body></body></html>',
+    } as Response);
 
-### Test Error Handling
-1. POST /post with invalid URL
-2. Verify proper error message returned
-3. POST /post with URL that returns 404
-4. Verify HTTP error handling works
-`;
+    await expect(extractContent('https://example.com/empty')).rejects.toThrow();
+  });
+
+  it('should calculate reading time correctly', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => naverBlogHtml,
+    } as Response);
+
+    const result = await extractContent('https://blog.naver.com/test/123');
+
+    // Reading time should be at least 1 minute
+    expect(result.readingTime).toBeGreaterThanOrEqual(1);
+    // Reading time should be calculated based on word count / 200
+    expect(result.readingTime).toBe(Math.max(1, Math.ceil(result.wordCount / 200)));
+  });
+});
+
+describe('Naver Blog Special Handling', () => {
+  it('should detect Naver Blog URL', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => naverBlogHtml,
+    } as Response);
+
+    const result = await extractContent('https://blog.naver.com/bizucafe/223886283493');
+
+    expect(result.siteName).toBe('blog.naver.com');
+  });
+
+  it('should extract title from og:title meta tag for Naver Blog', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => naverBlogHtml,
+    } as Response);
+
+    const result = await extractContent('https://blog.naver.com/test/123');
+
+    expect(result.title).toBe('테스트 블로그 글 제목');
+  });
+
+  it('should extract content from #postViewArea for Naver Blog', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => naverBlogHtml,
+    } as Response);
+
+    const result = await extractContent('https://blog.naver.com/test/123');
+
+    expect(result.content).toContain('네이버 블로그 테스트 콘텐츠');
+    expect(result.content).toContain('충분한 길이의 본문');
+  });
+});
