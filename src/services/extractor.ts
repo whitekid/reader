@@ -8,6 +8,38 @@ import { parseHTML } from 'linkedom';
 import type { ExtractedContent } from '../types.js';
 
 /**
+ * Check if URL is Naver Blog
+ */
+function isNaverBlog(url: string): boolean {
+  return url.includes('blog.naver.com');
+}
+
+/**
+ * Extract content from Naver Blog (special handling)
+ */
+function extractNaverBlogContent(document: any): { content: string; excerpt: string } | null {
+  // Try to find main content area
+  const selectors = [
+    '#postViewArea',           // Main content container
+    '.se-main-container',      // Smart Editor content
+    '#viewTypeSelector',       // Alternative content area
+    '.post-view',              // Post view container
+  ];
+
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element && element.textContent.trim().length > 100) {
+      const content = element.innerHTML || '';
+      const text = element.textContent || '';
+      const excerpt = truncateExcerpt(text);
+      return { content, excerpt };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Extract article content from URL
  */
 export async function extractContent(url: string): Promise<ExtractedContent> {
@@ -15,7 +47,9 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     // Fetch HTML with proper headers
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ReaderBot/1.0)',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
       },
     });
 
@@ -28,16 +62,42 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     // Parse HTML with linkedom (Cloudflare Workers compatible)
     const { document } = parseHTML(html);
 
+    // Special handling for Naver Blog
+    if (isNaverBlog(url)) {
+      const naverContent = extractNaverBlogContent(document);
+      if (naverContent) {
+        // Extract title from meta or h3
+        const titleElement = document.querySelector('meta[property="og:title"]')
+          || document.querySelector('.pcol1 h3')
+          || document.querySelector('title');
+        const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
+
+        const wordCount = estimateWordCount(naverContent.excerpt);
+        const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+        return {
+          title: title.trim(),
+          content: naverContent.content,
+          excerpt: naverContent.excerpt,
+          author: null,
+          siteName: 'blog.naver.com',
+          publishedTime: null,
+          wordCount,
+          readingTime,
+        };
+      }
+    }
+
     // Extract content with Readability
     const reader = new Readability(document, {
       keepClasses: false,
-      charThreshold: 500,
+      charThreshold: 100, // Lower threshold for better extraction
     });
 
     const article = reader.parse();
 
     if (!article) {
-      throw new Error('Failed to parse article content');
+      throw new Error('Failed to parse article content - no readable content found');
     }
 
     // Calculate reading time (average 200 words per minute)
