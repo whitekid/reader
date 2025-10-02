@@ -21,9 +21,14 @@ export function renderReader(article: Article): string {
 <body>
   <div class="toolbar">
     <a href="/">← Back</a>
-    <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
-      <button type="submit">✓ Mark as Read</button>
-    </form>
+    <div style="display: flex; gap: 8px;">
+      <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+        <button type="button" style="background: #666; cursor: pointer;">🔗 Open Original</button>
+      </a>
+      <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
+        <button type="submit">✓ Mark as Read</button>
+      </form>
+    </div>
   </div>
 
   <div class="container">
