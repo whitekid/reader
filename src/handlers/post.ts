@@ -8,6 +8,43 @@ import { createArticle, getArticleByUrl } from '../services/articleService.js';
 import type { Env } from '../types.js';
 
 /**
+ * Normalize URL by removing tracking parameters
+ */
+function normalizeUrl(urlString: string): string {
+  const url = new URL(urlString);
+
+  // Common tracking parameters to remove
+  const trackingParams = [
+    // UTM parameters
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+    // Facebook
+    'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_source', 'fb_ref',
+    // Google
+    'gclid', 'gclsrc', 'dclid',
+    // Twitter/X
+    'twclid', 'twsrc',
+    // LinkedIn
+    'li_source', 'li_medium',
+    // Microsoft
+    'msclkid',
+    // TikTok
+    'ttclid',
+    // Other common tracking
+    'ref', 'ref_src', 'ref_url', 'referrer',
+    'trackingCode', 'trackingId', 'tracking_id',
+    'source', 'campaign', 'medium',
+    // RSS/Feed
+    'fromRss', 'from',
+  ];
+
+  trackingParams.forEach(param => {
+    url.searchParams.delete(param);
+  });
+
+  return url.toString();
+}
+
+/**
  * Handle POST /post request
  */
 export async function handlePost(request: Request, env: Env): Promise<Response> {
@@ -47,6 +84,9 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
     } catch {
       return new Response('Invalid URL format', { status: 400 });
     }
+
+    // Normalize URL by removing tracking parameters
+    url = normalizeUrl(url);
 
     // Check if article already exists
     const existing = await getArticleByUrl(env.DB, url);
