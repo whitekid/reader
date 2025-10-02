@@ -23,8 +23,9 @@ export async function handleMarkRead(request: Request, env: Env, id: string): Pr
       return new Response('Failed to mark article as read', { status: 500 });
     }
 
-    // Redirect to home
-    return Response.redirect('/', 302);
+    // Redirect to home (use absolute URL)
+    const url = new URL('/', request.url);
+    return Response.redirect(url.toString(), 302);
   } catch (error) {
     console.error('POST /r/{id}/mark-read error:', error);
     return new Response(
