@@ -51,7 +51,8 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
     // Check if article already exists
     const existing = await getArticleByUrl(env.DB, url);
     if (existing) {
-      return Response.redirect(`/r/${existing.id}`, 302);
+      const redirectUrl = new URL(`/r/${existing.id}`, request.url);
+      return Response.redirect(redirectUrl.toString(), 302);
     }
 
     // Extract content from URL
@@ -63,8 +64,9 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
       ...content,
     });
 
-    // Redirect to reader view
-    return Response.redirect(`/r/${articleId}`, 302);
+    // Redirect to reader view (use absolute URL)
+    const redirectUrl = new URL(`/r/${articleId}`, request.url);
+    return Response.redirect(redirectUrl.toString(), 302);
   } catch (error) {
     console.error('POST /post error:', error);
     return new Response(
