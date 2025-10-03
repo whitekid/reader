@@ -23,6 +23,15 @@ export async function getArticleByUrl(db: D1Database, url: string): Promise<Arti
   return result || null;
 }
 
+export async function getAllArticles(db: D1Database, limit = 50): Promise<Article[]> {
+  const result = await db
+    .prepare('SELECT * FROM articles ORDER BY created_at DESC LIMIT ?')
+    .bind(limit)
+    .all<Article>();
+
+  return result.results || [];
+}
+
 export async function getUnreadArticles(db: D1Database, limit = 50): Promise<Article[]> {
   const result = await db
     .prepare('SELECT * FROM articles WHERE is_read = 0 ORDER BY created_at DESC LIMIT ?')
@@ -57,6 +66,35 @@ export async function createArticle(
     .run();
 
   return result.meta.last_row_id;
+}
+
+export async function updateArticleContent(
+  db: D1Database,
+  id: number,
+  data: ExtractedContent
+): Promise<boolean> {
+  const result = await db
+    .prepare(`
+      UPDATE articles
+      SET title = ?, content = ?, excerpt = ?, author = ?, site_name = ?,
+          published_time = ?, word_count = ?, reading_time = ?,
+          is_read = 0, created_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    .bind(
+      data.title,
+      data.content,
+      data.excerpt,
+      data.author,
+      data.siteName,
+      data.publishedTime,
+      data.wordCount,
+      data.readingTime,
+      id
+    )
+    .run();
+
+  return result.success;
 }
 
 export async function markAsRead(db: D1Database, id: number): Promise<boolean> {

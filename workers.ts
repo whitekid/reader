@@ -9,7 +9,9 @@ import { handleReader } from './src/handlers/reader.js';
 import { handleMarkRead } from './src/handlers/markRead.js';
 import { handleFavorite } from './src/handlers/favorite.js';
 import { handleFavorites } from './src/handlers/favorites.js';
+import { handleUnread } from './src/handlers/unread.js';
 import { handleRandom } from './src/handlers/random.js';
+import { handleDelete } from './src/handlers/delete.js';
 import type { Env } from './src/types.js';
 
 export default {
@@ -24,7 +26,7 @@ export default {
         return handleHome(request, env);
       }
 
-      if (method === 'POST' && pathname === '/post') {
+      if ((method === 'GET' || method === 'POST') && pathname === '/post') {
         return handlePost(request, env);
       }
 
@@ -33,6 +35,10 @@ export default {
         const id = readerMatch[1];
         if (method === 'GET') {
           return handleReader(request, env, id);
+        }
+        // DELETE /r/:id (RESTful) or POST with _method=DELETE
+        if (method === 'DELETE' || method === 'POST') {
+          return handleDelete(request, env, id);
         }
       }
 
@@ -50,6 +56,10 @@ export default {
         if (method === 'POST') {
           return handleFavorite(request, env, id);
         }
+      }
+
+      if (method === 'GET' && pathname === '/unread') {
+        return handleUnread(request, env);
       }
 
       if (method === 'GET' && pathname === '/favorites') {

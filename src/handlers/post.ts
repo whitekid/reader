@@ -4,7 +4,7 @@
  */
 
 import { extractContent } from '../services/extractor.js';
-import { createArticle, getArticleByUrl } from '../services/articleService.js';
+import { createArticle, getArticleByUrl, updateArticleContent } from '../services/articleService.js';
 import type { Env } from '../types.js';
 
 /**
@@ -88,15 +88,17 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
     // Normalize URL by removing tracking parameters
     url = normalizeUrl(url);
 
+    // Extract content from URL (always extract to get latest version)
+    const content = await extractContent(url);
+
     // Check if article already exists
     const existing = await getArticleByUrl(env.DB, url);
     if (existing) {
+      // Re-extract and update content (fixes images, gets latest version)
+      await updateArticleContent(env.DB, existing.id, content);
       const redirectUrl = new URL(`/r/${existing.id}`, request.url);
       return Response.redirect(redirectUrl.toString(), 302);
     }
-
-    // Extract content from URL
-    const content = await extractContent(url);
 
     // Save to database
     const articleId = await createArticle(env.DB, {

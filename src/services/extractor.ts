@@ -201,6 +201,7 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     const reader = new Readability(document, {
       keepClasses: false,
       charThreshold: 100, // Lower threshold for better extraction
+      url: url, // Pass URL to resolve relative image/link paths
     });
 
     const article = reader.parse();

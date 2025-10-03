@@ -14,7 +14,7 @@ export async function handleFavorites(request: Request, env: Env): Promise<Respo
   try {
     const articles = await getFavoriteArticles(env.DB);
 
-    const html = renderList(articles, true); // true = favorites mode
+    const html = renderList(articles, 'favorites');
 
     return new Response(html, {
       headers: {
