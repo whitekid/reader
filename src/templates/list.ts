@@ -169,7 +169,7 @@ export function renderList(articles: Article[], mode: ViewMode = 'all'): string 
   <div class="toolbar">
     <h1 style="margin: 0; font-size: 20px;">📚 Reader</h1>
     <div class="nav-menu" style="display: flex; gap: 10px;">
-      <a href="/" style="${mode === 'all' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">
+      <a href="/all" style="${mode === 'all' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">
         <span class="nav-text">All</span><span class="nav-icon">📄</span>
       </a>
       <a href="/unread" style="${mode === 'unread' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">

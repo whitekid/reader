@@ -3,12 +3,12 @@
  * Cloudflare Workers entry point with routing
  */
 
-import { handleHome } from './src/handlers/home.js';
 import { handlePost } from './src/handlers/post.js';
 import { handleReader } from './src/handlers/reader.js';
 import { handleMarkRead } from './src/handlers/markRead.js';
 import { handleFavorite } from './src/handlers/favorite.js';
 import { handleFavorites } from './src/handlers/favorites.js';
+import { handleAll } from './src/handlers/all.js';
 import { handleUnread } from './src/handlers/unread.js';
 import { handleRandom } from './src/handlers/random.js';
 import { handleDelete } from './src/handlers/delete.js';
@@ -23,11 +23,15 @@ export default {
     try {
       // Router
       if (method === 'GET' && pathname === '/') {
-        return handleHome(request, env);
+        return Response.redirect(new URL('/unread', request.url).toString(), 302);
       }
 
       if ((method === 'GET' || method === 'POST') && pathname === '/post') {
         return handlePost(request, env);
+      }
+
+      if (method === 'GET' && pathname === '/all') {
+        return handleAll(request, env);
       }
 
       const readerMatch = pathname.match(/^\/r\/(\d+)$/);
