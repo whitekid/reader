@@ -22,11 +22,16 @@ export function renderReader(article: Article): string {
 <body>
   <div class="toolbar">
     <a href="/">← Back</a>
+    <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer">🔗 Original</a>
     <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
-      <button type="submit">✓ Mark as Read</button>
+      <button type="submit">${article.is_read ? '○' : '✓'} Mark as ${article.is_read ? 'Unread' : 'Read'}</button>
     </form>
     <form method="POST" action="/favorite/${article.id}" style="margin: 0;">
       <button type="submit">${article.is_favorite ? '★' : '☆'} Favorite</button>
+    </form>
+    <form method="POST" action="/r/${article.id}" style="margin: 0;" onsubmit="return confirm('Delete this article?');">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" style="color: #dc2626;">🗑️ Delete</button>
     </form>
   </div>
 
