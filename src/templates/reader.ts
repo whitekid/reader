@@ -17,21 +17,49 @@ export function renderReader(article: Article): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(article.title)} - Reader</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <style>${styles}</style>
+  <style>
+    ${styles}
+
+    /* Mobile toolbar - show icons only */
+    @media (max-width: 640px) {
+      .toolbar {
+        gap: 4px !important;
+      }
+
+      .toolbar-text {
+        display: none;
+      }
+
+      .toolbar-icon {
+        display: inline;
+      }
+    }
+
+    /* Desktop toolbar - show text with icons */
+    @media (min-width: 641px) {
+      .toolbar-text {
+        display: inline;
+      }
+
+      .toolbar-icon {
+        display: inline;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="toolbar">
-    <a href="/">← Back</a>
-    <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer">🔗 Original</a>
+    <a href="/"><span class="toolbar-icon">←</span><span class="toolbar-text"> Back</span></a>
+    <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer"><span class="toolbar-icon">🔗</span><span class="toolbar-text"> Original</span></a>
     <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
-      <button type="submit">${article.is_read ? '○' : '✓'} Mark as ${article.is_read ? 'Unread' : 'Read'}</button>
+      <button type="submit"><span class="toolbar-icon">${article.is_read ? '○' : '✓'}</span><span class="toolbar-text"> ${article.is_read ? 'Unread' : 'Read'}</span></button>
     </form>
     <form method="POST" action="/favorite/${article.id}" style="margin: 0;">
-      <button type="submit">${article.is_favorite ? '★' : '☆'} Favorite</button>
+      <button type="submit"><span class="toolbar-icon">${article.is_favorite ? '★' : '☆'}</span><span class="toolbar-text"> Favorite</span></button>
     </form>
     <form method="POST" action="/r/${article.id}" style="margin: 0;" onsubmit="return confirm('Delete this article?');">
       <input type="hidden" name="_method" value="DELETE">
-      <button type="submit" style="color: #dc2626;">🗑️ Delete</button>
+      <button type="submit" style="color: #dc2626;"><span class="toolbar-icon">🗑️</span><span class="toolbar-text"> Delete</span></button>
     </form>
   </div>
 
