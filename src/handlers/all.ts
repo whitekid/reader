@@ -1,6 +1,6 @@
 /**
- * GET / handler
- * Display list of unread articles
+ * GET /all handler
+ * Display list of all articles
  */
 
 import { getAllArticles } from '../services/articleService.js';
@@ -8,9 +8,9 @@ import { renderList } from '../templates/list.js';
 import type { Env } from '../types.js';
 
 /**
- * Handle GET / request
+ * Handle GET /all request
  */
-export async function handleHome(request: Request, env: Env): Promise<Response> {
+export async function handleAll(request: Request, env: Env): Promise<Response> {
   try {
     const articles = await getAllArticles(env.DB);
 
@@ -22,7 +22,7 @@ export async function handleHome(request: Request, env: Env): Promise<Response> 
       },
     });
   } catch (error) {
-    console.error('GET / error:', error);
+    console.error('GET /all error:', error);
     return new Response(
       `Failed to load articles: ${(error as Error).message}`,
       { status: 500 }
