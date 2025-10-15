@@ -14,6 +14,7 @@ export interface Article {
   word_count: number;
   reading_time: number;
   is_read: number; // 0: unread, 1: read
+  is_favorite: number; // 0: not favorite, 1: favorite
   created_at: string;
   read_at: string | null;
 }

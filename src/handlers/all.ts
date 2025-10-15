@@ -1,9 +1,9 @@
 /**
  * GET /all handler
- * Display list of all articles
+ * Display list of all articles with infinite scroll support
  */
 
-import { getAllArticles } from '../services/articleService.js';
+import { getAllArticlesPaginated } from '../services/articleService.js';
 import { renderList } from '../templates/list.js';
 import type { Env } from '../types.js';
 
@@ -12,9 +12,27 @@ import type { Env } from '../types.js';
  */
 export async function handleAll(request: Request, env: Env): Promise<Response> {
   try {
-    const articles = await getAllArticles(env.DB);
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const accept = request.headers.get('accept') || '';
 
-    const html = renderList(articles, 'all');
+    const { articles, nextCursor, hasMore } = await getAllArticlesPaginated(
+      env.DB,
+      cursor,
+      20
+    );
+
+    // JSON API for AJAX requests
+    if (accept.includes('application/json')) {
+      return new Response(JSON.stringify({ articles, nextCursor, hasMore }), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // HTML response for initial page load
+    const html = renderList(articles, 'all', nextCursor, hasMore);
 
     return new Response(html, {
       headers: {

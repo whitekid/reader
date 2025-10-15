@@ -1,9 +1,9 @@
 /**
  * GET /favorites handler
- * Display list of favorite articles
+ * Display list of favorite articles with infinite scroll support
  */
 
-import { getFavoriteArticles } from '../services/articleService.js';
+import { getFavoriteArticlesPaginated } from '../services/articleService.js';
 import { renderList } from '../templates/list.js';
 import type { Env } from '../types.js';
 
@@ -12,9 +12,27 @@ import type { Env } from '../types.js';
  */
 export async function handleFavorites(request: Request, env: Env): Promise<Response> {
   try {
-    const articles = await getFavoriteArticles(env.DB);
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get('cursor');
+    const accept = request.headers.get('accept') || '';
 
-    const html = renderList(articles, 'favorites');
+    const { articles, nextCursor, hasMore } = await getFavoriteArticlesPaginated(
+      env.DB,
+      cursor,
+      20
+    );
+
+    // JSON API for AJAX requests
+    if (accept.includes('application/json')) {
+      return new Response(JSON.stringify({ articles, nextCursor, hasMore }), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // HTML response for initial page load
+    const html = renderList(articles, 'favorites', nextCursor, hasMore);
 
     return new Response(html, {
       headers: {
