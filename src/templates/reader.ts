@@ -19,32 +19,6 @@ export function renderReader(article: Article): string {
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     ${styles}
-
-    /* Mobile toolbar - show icons only */
-    @media (max-width: 640px) {
-      .toolbar {
-        gap: 4px !important;
-      }
-
-      .toolbar-text {
-        display: none;
-      }
-
-      .toolbar-icon {
-        display: inline;
-      }
-    }
-
-    /* Desktop toolbar - show text with icons */
-    @media (min-width: 641px) {
-      .toolbar-text {
-        display: inline;
-      }
-
-      .toolbar-icon {
-        display: inline;
-      }
-    }
   </style>
 </head>
 <body>
@@ -59,7 +33,7 @@ export function renderReader(article: Article): string {
     </form>
     <form method="POST" action="/r/${article.id}" style="margin: 0;" onsubmit="return confirm('Delete this article?');">
       <input type="hidden" name="_method" value="DELETE">
-      <button type="submit" style="color: #dc2626;"><span class="toolbar-icon">🗑️</span><span class="toolbar-text"> Delete</span></button>
+      <button type="submit" class="delete"><span class="toolbar-icon">🗑️</span><span class="toolbar-text"> Delete</span></button>
     </form>
   </div>
 
@@ -67,9 +41,9 @@ export function renderReader(article: Article): string {
     <h1>${escapeHtml(article.title)}</h1>
 
     <div class="meta">
-      ${article.author ? `by ${escapeHtml(article.author)} • ` : ''}
-      ${article.site_name ? `<a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${escapeHtml(article.site_name)}</a>` : ''} •
-      ${article.reading_time} min read
+      ${article.author ? `<span>by ${escapeHtml(article.author)}</span><span>•</span>` : ''}
+      ${article.site_name ? `<a href="${escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${escapeHtml(article.site_name)}</a><span>•</span>` : ''}
+      <span>${article.reading_time} min read</span>
     </div>
 
     <div class="article-content">

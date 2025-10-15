@@ -174,16 +174,16 @@ export function renderList(
   <div class="toolbar">
     <h1 style="margin: 0; font-size: 20px;">📚 Reader</h1>
     <div class="nav-menu" style="display: flex; gap: 10px;">
-      <a href="/all" style="${mode === 'all' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">
+      <a href="/all" class="${mode === 'all' ? 'active' : ''}">
         <span class="nav-text">All</span><span class="nav-icon">📄</span>
       </a>
-      <a href="/unread" style="${mode === 'unread' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">
+      <a href="/unread" class="${mode === 'unread' ? 'active' : ''}">
         <span class="nav-text">Unread</span><span class="nav-icon">○</span>
       </a>
-      <a href="/favorites" style="${mode === 'favorites' ? 'font-weight: bold; text-decoration: underline;' : 'color: var(--text-secondary);'}">
+      <a href="/favorites" class="${mode === 'favorites' ? 'active' : ''}">
         <span class="nav-text">Favorites</span><span class="nav-icon">★</span>
       </a>
-      <a href="/random" style="color: var(--text-secondary);">
+      <a href="/random">
         <span class="nav-text">Random</span><span class="nav-icon">🎲</span>
       </a>
     </div>
@@ -237,47 +237,29 @@ function renderArticle(article: Article): string {
       <div class="article-card-content">
         <h2><a href="/r/${article.id}">${escapeHtml(article.title)}</a></h2>
         <div class="meta">
-          ${article.site_name ? escapeHtml(article.site_name) : 'Unknown'} •
-          ${article.reading_time} min read
+          <span>${article.site_name ? escapeHtml(article.site_name) : 'Unknown'}</span>
+          <span>•</span>
+          <span>${article.reading_time} min read</span>
         </div>
         <div class="excerpt">${escapeHtml(article.excerpt)}</div>
-
-        <div class="article-actions" style="display: flex; gap: 2px;">
-          <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
-            <button type="submit" title="${article.is_read ? 'Mark as Unread' : 'Mark as Read'}">
-              ${article.is_read ? '○' : '✓'}
-            </button>
-          </form>
-          <form method="POST" action="/favorite/${article.id}" style="margin: 0;">
-            <button type="submit" title="${article.is_favorite ? 'Unfavorite' : 'Favorite'}">
-              ${article.is_favorite ? '★' : '☆'}
-            </button>
-          </form>
-          <form method="POST" action="/r/${article.id}" style="margin: 0;" onsubmit="return confirm('Delete this article?');">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" style="color: #dc2626;" title="Delete">
-              🗑️
-            </button>
-          </form>
-        </div>
       </div>
-
-      <div class="swipe-actions">
-        <button class="swipe-read"
-                title="${article.is_read ? 'Mark as Unread' : 'Mark as Read'}"
-                aria-label="${article.is_read ? 'Mark as Unread' : 'Mark as Read'}">
-          ${article.is_read ? '○' : '✓'}
-        </button>
-        <button class="swipe-favorite"
-                title="${article.is_favorite ? 'Unfavorite' : 'Favorite'}"
-                aria-label="${article.is_favorite ? 'Unfavorite' : 'Favorite'}">
-          ${article.is_favorite ? '★' : '☆'}
-        </button>
-        <button class="swipe-delete delete"
-                title="Delete"
-                aria-label="Delete article">
-          🗑️
-        </button>
+      <div class="article-actions">
+        <form method="POST" action="/r/${article.id}/mark-read" style="margin: 0;">
+          <button type="submit" title="${article.is_read ? 'Mark as Unread' : 'Mark as Read'}">
+            ${article.is_read ? '○' : '✓'}
+          </button>
+        </form>
+        <form method="POST" action="/favorite/${article.id}" style="margin: 0;">
+          <button type="submit" title="${article.is_favorite ? 'Unfavorite' : 'Favorite'}">
+            ${article.is_favorite ? '★' : '☆'}
+          </button>
+        </form>
+        <form method="POST" action="/r/${article.id}" style="margin: 0;" onsubmit="return confirm('Delete this article?');">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="delete" title="Delete">
+            🗑️
+          </button>
+        </form>
       </div>
     </li>
   `;
