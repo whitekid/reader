@@ -11,6 +11,7 @@ import { handleFavorites } from './src/handlers/favorites.js';
 import { handleAll } from './src/handlers/all.js';
 import { handleUnread } from './src/handlers/unread.js';
 import { handleRandom } from './src/handlers/random.js';
+import { handleSitemap } from './src/handlers/sitemap.js';
 import { handleDelete } from './src/handlers/delete.js';
 import type { Env } from './src/types.js';
 
@@ -24,6 +25,10 @@ export default {
       // Router
       if (method === 'GET' && pathname === '/') {
         return Response.redirect(new URL('/unread', request.url).toString(), 302);
+      }
+
+      if (method === 'GET' && pathname === '/sitemap.xml') {
+        return handleSitemap(request, env);
       }
 
       if ((method === 'GET' || method === 'POST') && pathname === '/post') {

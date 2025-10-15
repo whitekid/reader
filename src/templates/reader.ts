@@ -16,7 +16,48 @@ export function renderReader(article: Article): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(article.title)} - Reader</title>
+  <meta name="description" content="${escapeHtml(article.excerpt)}">
+  <meta name="keywords" content="reader, article, pocket, readability">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${escapeHtml(article.url)}">
+  <meta property="og:title" content="${escapeHtml(article.title)}">
+  <meta property="og:description" content="${escapeHtml(article.excerpt)}">
+  <meta property="og:site_name" content="Reader">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary">
+  <meta property="twitter:url" content="${escapeHtml(article.url)}">
+  <meta property="twitter:title" content="${escapeHtml(article.title)}">
+  <meta property="twitter:description" content="${escapeHtml(article.excerpt)}">
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "${escapeHtml(article.title)}",
+      "author": {
+        "@type": "Person",
+        "name": "${escapeHtml(article.author || article.site_name || 'Unknown')}"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Reader",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "/favicon.svg"
+        }
+      },
+      "description": "${escapeHtml(article.excerpt)}",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "${escapeHtml(article.url)}"
+      }
+    }
+  </script>
+
   <style>
     ${styles}
   </style>

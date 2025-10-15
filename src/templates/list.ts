@@ -25,6 +25,7 @@ export function renderList(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reader - ${titleText}</title>
+  <meta name="description" content="A simple and clean reader for your saved articles.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     ${styles}
