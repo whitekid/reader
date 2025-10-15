@@ -15,26 +15,26 @@ function normalizeUrl(urlString: string): string {
 
   // Common tracking parameters to remove
   const trackingParams = [
-    // UTM parameters
+    // Common tracking parameters
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-    // Facebook
-    'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_source', 'fb_ref',
-    // Google
-    'gclid', 'gclsrc', 'dclid',
-    // Twitter/X
-    'twclid', 'twsrc',
-    // LinkedIn
-    'li_source', 'li_medium',
-    // Microsoft
-    'msclkid',
-    // TikTok
-    'ttclid',
-    // Other common tracking
-    'ref', 'ref_src', 'ref_url', 'referrer',
-    'trackingCode', 'trackingId', 'tracking_id',
-    'source', 'campaign', 'medium',
-    // RSS/Feed
-    'fromRss', 'from',
+    'fbclid', 'gclid', 'msclkid', 'dclid',
+
+    // Other common parameters
+    'ref', 'source', 'ref_src', 'ref_url', 'embed', 'share',
+
+    // Social media specific
+    'si', // Spotify
+    'igshid', // Instagram
+    's_src', 's_cid', // Adobe Analytics
+
+    // Mailchimp
+    'mc_cid', 'mc_eid',
+
+    // HubSpot
+    '_hsenc', '_hsmi',
+
+    // YouTube
+    'feature', 'list', 'index', 't',
   ];
 
   trackingParams.forEach(param => {
@@ -91,20 +91,7 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
     // Extract content from URL (always extract to get latest version)
     const content = await extractContent(url);
 
-    // Check if article already exists
-    const existing = await getArticleByUrl(env.DB, url);
-    if (existing) {
-      // Re-extract and update content (fixes images, gets latest version)
-      await updateArticleContent(env.DB, existing.id, content);
-      const redirectUrl = new URL(`/r/${existing.id}`, request.url);
-      return Response.redirect(redirectUrl.toString(), 302);
-    }
-
-    // Save to database
-    const articleId = await createArticle(env.DB, {
-      url,
-      ...content,
-    });
+    const articleId = await createOrUpdateArticle(env, url, content);
 
     // Redirect to reader view (use absolute URL)
     const redirectUrl = new URL(`/r/${articleId}`, request.url);

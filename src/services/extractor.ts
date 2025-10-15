@@ -70,7 +70,7 @@ function convertToNaverPostViewUrl(url: string): string {
 /**
  * Extract content from Naver Blog (special handling)
  */
-function extractNaverBlogContent(document: any): { content: string; excerpt: string } | null {
+async function extractNaverBlogContent(url: string, document: any): Promise<ExtractedContent | null> {
   // Try to find main content area
   const selectors = [
     '#postViewArea',           // Main content container
@@ -85,7 +85,28 @@ function extractNaverBlogContent(document: any): { content: string; excerpt: str
       const content = element.innerHTML || '';
       const text = element.textContent || '';
       const excerpt = truncateExcerpt(text);
-      return { content, excerpt };
+
+      const titleElement = document.querySelector('meta[property="og:title"]')
+        || document.querySelector('.pcol1 h3')
+        || document.querySelector('.se-title-text')
+        || document.querySelector('title');
+      const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
+
+      const wordCount = estimateWordCount(text);
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+      const publishedTime = parsePublishedTime(document);
+
+      return {
+        title: title.trim(),
+        content: content,
+        excerpt: excerpt,
+        author: null,
+        siteName: 'blog.naver.com',
+        publishedTime,
+        wordCount,
+        readingTime,
+      };
     }
   }
 
@@ -129,10 +150,7 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
 
     // Special handling for Naver Blog
     if (isNaverBlog(url)) {
-      // Convert to PostView URL to get actual content (bypasses iframe)
       const postViewUrl = convertToNaverPostViewUrl(url);
-
-      // If URL was converted, fetch the PostView page
       if (postViewUrl !== url) {
         const postViewResponse = await fetch(postViewUrl, {
           headers: {
@@ -141,59 +159,20 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
             'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
           },
         });
-
         if (postViewResponse.ok) {
           const postViewHtml = await postViewResponse.text();
           const { document: postViewDoc } = parseHTML(postViewHtml);
-          const naverContent = extractNaverBlogContent(postViewDoc);
-
+          const naverContent = await extractNaverBlogContent(postViewUrl, postViewDoc);
           if (naverContent) {
-            // Extract title from meta or h3
-            const titleElement = postViewDoc.querySelector('meta[property="og:title"]')
-              || postViewDoc.querySelector('.pcol1 h3')
-              || postViewDoc.querySelector('.se-title-text')
-              || postViewDoc.querySelector('title');
-            const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
-
-            const wordCount = estimateWordCount(naverContent.excerpt);
-            const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-
-            return {
-              title: title.trim(),
-              content: naverContent.content,
-              excerpt: naverContent.excerpt,
-              author: null,
-              siteName: 'blog.naver.com',
-              publishedTime: null,
-              wordCount,
-              readingTime,
-            };
+            return naverContent;
           }
         }
       }
 
       // Fallback: try extracting from original document
-      const naverContent = extractNaverBlogContent(document);
+      const naverContent = await extractNaverBlogContent(url, document);
       if (naverContent) {
-        const titleElement = document.querySelector('meta[property="og:title"]')
-          || document.querySelector('.pcol1 h3')
-          || document.querySelector('.se-title-text')
-          || document.querySelector('title');
-        const title = titleElement?.getAttribute('content') || titleElement?.textContent || 'Untitled';
-
-        const wordCount = estimateWordCount(naverContent.excerpt);
-        const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-
-        return {
-          title: title.trim(),
-          content: naverContent.content,
-          excerpt: naverContent.excerpt,
-          author: null,
-          siteName: 'blog.naver.com',
-          publishedTime: null,
-          wordCount,
-          readingTime,
-        };
+        return naverContent;
       }
     }
 
@@ -201,7 +180,6 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     const reader = new Readability(document, {
       keepClasses: false,
       charThreshold: 100, // Lower threshold for better extraction
-      url: url, // Pass URL to resolve relative image/link paths
     });
 
     const article = reader.parse();
@@ -213,6 +191,7 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     // Calculate reading time (average 200 words per minute)
     const wordCount = estimateWordCount(article.textContent);
     const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+    const publishedTime = parsePublishedTime(document);
 
     return {
       title: article.title || 'Untitled',
@@ -220,7 +199,7 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
       excerpt: truncateExcerpt(article.excerpt || article.textContent || ''),
       author: article.byline || null,
       siteName: article.siteName || extractDomain(url),
-      publishedTime: null, // Can be enhanced with meta tag parsing
+      publishedTime,
       wordCount,
       readingTime,
     };
@@ -228,6 +207,30 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     console.error('Content extraction failed:', error);
     throw new Error(`Failed to extract content: ${(error as Error).message}`);
   }
+}
+
+/**
+ * Parse published time from meta tags
+ */
+function parsePublishedTime(document: any): string | null {
+  const selectors = [
+    'meta[property="article:published_time"]',
+    'meta[property="og:article:published_time"]',
+    'meta[name="citation_date"]',
+    'meta[name="date"]',
+  ];
+
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      const content = element.getAttribute('content');
+      if (content && !isNaN(new Date(content).getTime())) {
+        return new Date(content).toISOString();
+      }
+    }
+  }
+
+  return null;
 }
 
 /**

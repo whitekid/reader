@@ -97,23 +97,20 @@ export async function updateArticleContent(
   return result.success;
 }
 
-export async function markAsRead(db: D1Database, id: number): Promise<boolean> {
+
+
+export async function toggleReadStatus(db: D1Database, id: number): Promise<boolean> {
   const result = await db
-    .prepare('UPDATE articles SET is_read = 1, read_at = CURRENT_TIMESTAMP WHERE id = ?')
+    .prepare('UPDATE articles SET is_read = CASE WHEN is_read = 1 THEN 0 ELSE 1 END, read_at = CASE WHEN is_read = 1 THEN NULL ELSE CURRENT_TIMESTAMP END WHERE id = ?')
     .bind(id)
     .run();
 
   return result.success;
 }
 
-export async function markAsUnread(db: D1Database, id: number): Promise<boolean> {
-  const result = await db
-    .prepare('UPDATE articles SET is_read = 0, read_at = NULL WHERE id = ?')
-    .bind(id)
-    .run();
-
-  return result.success;
-}
+/**
+ * Pagination result with cursor support
+ */
 
 export async function deleteArticle(db: D1Database, id: number): Promise<boolean> {
   const result = await db
@@ -134,21 +131,9 @@ export async function getFavoriteArticles(db: D1Database, limit = 50): Promise<A
 }
 
 export async function toggleFavorite(db: D1Database, id: number): Promise<boolean> {
-  // Get current favorite status
-  const article = await db
-    .prepare('SELECT is_favorite FROM articles WHERE id = ?')
-    .bind(id)
-    .first<{ is_favorite: number }>();
-
-  if (!article) {
-    return false;
-  }
-
-  // Toggle the favorite status
-  const newValue = article.is_favorite ? 0 : 1;
   const result = await db
-    .prepare('UPDATE articles SET is_favorite = ? WHERE id = ?')
-    .bind(newValue, id)
+    .prepare('UPDATE articles SET is_favorite = CASE WHEN is_favorite = 1 THEN 0 ELSE 1 END WHERE id = ?')
+    .bind(id)
     .run();
 
   return result.success;
@@ -160,4 +145,108 @@ export async function getRandomFavorite(db: D1Database): Promise<Article | null>
     .first<Article>();
 
   return result || null;
+}
+
+/**
+ * Pagination result with cursor support
+ */
+export interface PaginatedArticles {
+  articles: Article[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+/**
+ * Parse cursor string to timestamp and id
+ */
+function parseCursor(cursor: string): { timestamp: string; id: number } | null {
+  try {
+    const [timestamp, idStr] = cursor.split(':');
+    const id = parseInt(idStr, 10);
+    if (!timestamp || isNaN(id)) return null;
+    return { timestamp, id };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Create cursor string from article
+ */
+function createCursor(article: Article): string {
+  return `${article.created_at}:${article.id}`;
+}
+
+async function getArticlesPaginated(
+  db: D1Database,
+  whereClause: string,
+  cursor: string | null = null,
+  limit = 20
+): Promise<PaginatedArticles> {
+  let query: string;
+  let bindings: (string | number)[];
+
+  const baseQuery = `SELECT * FROM articles ${whereClause}`;
+  const orderBy = 'ORDER BY created_at DESC, id DESC';
+
+  if (cursor) {
+    const parsed = parseCursor(cursor);
+    if (!parsed) {
+      throw new Error('Invalid cursor format');
+    }
+    const cursorClause = `(created_at < ? OR (created_at = ? AND id < ?))`;
+    const where = whereClause ? `${whereClause} AND ${cursorClause}` : `WHERE ${cursorClause}`;
+    query = `SELECT * FROM articles ${where} ${orderBy} LIMIT ?`;
+    bindings = [parsed.timestamp, parsed.timestamp, parsed.id, limit + 1];
+  } else {
+    query = `${baseQuery} ${orderBy} LIMIT ?`;
+    bindings = [limit + 1];
+  }
+
+  const result = await db.prepare(query).bind(...bindings).all<Article>();
+  const articles = result.results || [];
+
+  const hasMore = articles.length > limit;
+  if (hasMore) {
+    articles.pop(); // Remove extra item
+  }
+
+  const nextCursor = hasMore && articles.length > 0
+    ? createCursor(articles[articles.length - 1])
+    : null;
+
+  return { articles, nextCursor, hasMore };
+}
+
+/**
+ * Get all articles with cursor-based pagination
+ */
+export async function getAllArticlesPaginated(
+  db: D1Database,
+  cursor: string | null = null,
+  limit = 20
+): Promise<PaginatedArticles> {
+  return getArticlesPaginated(db, '', cursor, limit);
+}
+
+/**
+ * Get unread articles with cursor-based pagination
+ */
+export async function getUnreadArticlesPaginated(
+  db: D1Database,
+  cursor: string | null = null,
+  limit = 20
+): Promise<PaginatedArticles> {
+  return getArticlesPaginated(db, 'WHERE is_read = 0', cursor, limit);
+}
+
+/**
+ * Get favorite articles with cursor-based pagination
+ */
+export async function getFavoriteArticlesPaginated(
+  db: D1dDatabase,
+  cursor: string | null = null,
+  limit = 20
+): Promise<PaginatedArticles> {
+  return getArticlesPaginated(db, 'WHERE is_favorite = 1', cursor, limit);
 }

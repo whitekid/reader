@@ -3,7 +3,7 @@
  * Safari Reader-inspired design with dark mode support
  */
 
-export const styles = `
+const globalStyles = `
   * {
     margin: 0;
     padding: 0;
@@ -46,7 +46,9 @@ export const styles = `
     color: var(--text);
     line-height: 1.6;
   }
+`;
 
+const toolbarStyles = `
   .toolbar {
     background: var(--toolbar-bg);
     border-bottom: 1px solid var(--toolbar-border);
@@ -74,13 +76,23 @@ export const styles = `
   .toolbar a:hover, .toolbar button:hover {
     background: var(--button-hover);
   }
+`;
 
+const containerStyles = `
   .container {
     max-width: 680px;
     margin: 0 auto;
     padding: 40px 20px;
   }
 
+  @media (max-width: 768px) {
+    .container {
+      padding: 24px 16px;
+    }
+  }
+`;
+
+const articleStyles = `
   h1 {
     font-size: 32px;
     font-weight: 700;
@@ -120,6 +132,18 @@ export const styles = `
     color: var(--link-hover);
   }
 
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 28px;
+    }
+
+    .article-content {
+      font-size: 17px;
+    }
+  }
+`;
+
+const articleListStyles = `
   .article-list {
     list-style: none;
   }
@@ -162,7 +186,9 @@ export const styles = `
     font-size: 15px;
     line-height: 1.5;
   }
+`;
 
+const addUrlStyles = `
   .add-url {
     margin-bottom: 32px;
   }
@@ -199,20 +225,17 @@ export const styles = `
   }
 
   @media (max-width: 768px) {
-    .container {
-      padding: 24px 16px;
-    }
-
-    h1 {
-      font-size: 28px;
-    }
-
-    .article-content {
-      font-size: 17px;
-    }
-
     .add-url form {
       flex-direction: column;
     }
   }
+`;
+
+export const styles = `
+  ${globalStyles}
+  ${toolbarStyles}
+  ${containerStyles}
+  ${articleStyles}
+  ${articleListStyles}
+  ${addUrlStyles}
 `;
