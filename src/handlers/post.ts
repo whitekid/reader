@@ -91,7 +91,18 @@ export async function handlePost(request: Request, env: Env): Promise<Response> 
     // Extract content from URL (always extract to get latest version)
     const content = await extractContent(url);
 
-    const articleId = await createOrUpdateArticle(env, url, content);
+    // Check if article exists
+    const existing = await getArticleByUrl(env.DB, url);
+    let articleId: number;
+
+    if (existing) {
+      // Update existing article
+      await updateArticleContent(env.DB, existing.id, content);
+      articleId = existing.id;
+    } else {
+      // Create new article
+      articleId = await createArticle(env.DB, { ...content, url });
+    }
 
     // Redirect to reader view (use absolute URL)
     const redirectUrl = new URL(`/r/${articleId}`, request.url);
