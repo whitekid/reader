@@ -139,6 +139,22 @@ export async function toggleFavorite(db: D1Database, id: number): Promise<boolea
   return result.success;
 }
 
+export async function getNextUnreadArticle(db: D1Database): Promise<Article | null> {
+  const result = await db
+    .prepare(
+      `
+      SELECT *
+      FROM articles
+      WHERE is_read = 0
+      ORDER BY created_at ASC
+      LIMIT 1
+      `
+    )
+    .first<Article>();
+
+  return result || null;
+}
+
 export async function getRandomFavorite(db: D1Database): Promise<Article | null> {
   const result = await db
     .prepare('SELECT * FROM articles WHERE is_favorite = 1 ORDER BY RANDOM() LIMIT 1')
@@ -244,7 +260,7 @@ export async function getUnreadArticlesPaginated(
  * Get favorite articles with cursor-based pagination
  */
 export async function getFavoriteArticlesPaginated(
-  db: D1dDatabase,
+  db: D1Database,
   cursor: string | null = null,
   limit = 20
 ): Promise<PaginatedArticles> {
