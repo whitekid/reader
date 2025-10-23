@@ -7,9 +7,7 @@ import { handlePost } from './src/handlers/post.js';
 import { handleReader } from './src/handlers/reader.js';
 import { handleMarkRead } from './src/handlers/markRead.js';
 import { handleFavorite } from './src/handlers/favorite.js';
-import { handleFavorites } from './src/handlers/favorites.js';
-import { handleAll } from './src/handlers/all.js';
-import { handleUnread } from './src/handlers/unread.js';
+import { handleList } from './src/handlers/list.js';
 import { handleRandom } from './src/handlers/random.js';
 import { handleSitemap } from './src/handlers/sitemap.js';
 import { handleDelete } from './src/handlers/delete.js';
@@ -36,7 +34,7 @@ export default {
       }
 
       if (method === 'GET' && pathname === '/all') {
-        return handleAll(request, env);
+        return handleList(request, env, 'all');
       }
 
       const readerMatch = pathname.match(/^\/r\/(\d+)$/);
@@ -68,11 +66,11 @@ export default {
       }
 
       if (method === 'GET' && pathname === '/unread') {
-        return handleUnread(request, env);
+        return handleList(request, env, 'unread');
       }
 
       if (method === 'GET' && pathname === '/favorites') {
-        return handleFavorites(request, env);
+        return handleList(request, env, 'favorites');
       }
 
       if (method === 'GET' && pathname === '/random') {
