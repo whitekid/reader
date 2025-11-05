@@ -11,6 +11,7 @@ import { handleList } from './src/handlers/list.js';
 import { handleRandom } from './src/handlers/random.js';
 import { handleSitemap } from './src/handlers/sitemap.js';
 import { handleDelete } from './src/handlers/delete.js';
+import { handleStatic } from './src/handlers/static.js';
 import type { Env } from './src/types.js';
 
 export default {
@@ -104,6 +105,12 @@ export default {
             'Cache-Control': 'public, max-age=31536000, immutable',
           },
         });
+      }
+
+      // Static files from public/ directory
+      if (method === 'GET' && pathname.startsWith('/public/')) {
+        const filename = pathname.substring('/public/'.length);
+        return handleStatic(filename);
       }
 
       // 404 Not Found
