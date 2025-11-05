@@ -27,6 +27,22 @@ export function renderList(
   <title>Reader - ${titleText}</title>
   <meta name="description" content="A simple and clean reader for your saved articles.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Apply theme before CSS loads to prevent FOUC -->
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var validThemes = ['light', 'dark', 'auto'];
+        if (theme && validThemes.indexOf(theme) !== -1 && theme !== 'auto') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) {
+        // localStorage unavailable (private browsing, etc.) - gracefully continue
+      }
+    })();
+  </script>
+
   <style>
     ${styles}
 
@@ -187,6 +203,7 @@ export function renderList(
       <a href="/random">
         <span class="nav-text">Random</span><span class="nav-icon">🎲</span>
       </a>
+      <button id="theme-toggle" title="Theme: auto" aria-label="Toggle theme (current: auto)" type="button">💻</button>
     </div>
   </div>
 
@@ -216,6 +233,7 @@ export function renderList(
   </div>
 
   <script src="/public/list.js" defer></script>
+  <script src="/public/theme.js" defer></script>
 </body>
 </html>
   `.trim();

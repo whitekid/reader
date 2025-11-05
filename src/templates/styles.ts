@@ -26,8 +26,39 @@ const globalStyles = `
     --button-hover: #d3d9df;
   }
 
+  /* Manual light theme selection */
+  :root[data-theme="light"] {
+    --bg: #f8f9fa;
+    --text: #212529;
+    --text-secondary: #6c757d;
+    --toolbar-bg: #ffffff;
+    --toolbar-border: #dee2e6;
+    --card-bg: #ffffff;
+    --card-border: #dee2e6;
+    --link: #007bff;
+    --link-hover: #0056b3;
+    --button-bg: #e9ecef;
+    --button-hover: #d3d9df;
+  }
+
+  /* Manual dark theme selection */
+  :root[data-theme="dark"] {
+    --bg: #121212;
+    --text: #e9ecef;
+    --text-secondary: #adb5bd;
+    --toolbar-bg: #1c1c1c;
+    --toolbar-border: #343a40;
+    --card-bg: #1c1c1c;
+    --card-border: #343a40;
+    --link: #80bfff;
+    --link-hover: #a8d8ff;
+    --button-bg: #343a40;
+    --button-hover: #495057;
+  }
+
+  /* Auto mode: system preference (only when no data-theme attribute) */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme]) {
       --bg: #121212;
       --text: #e9ecef;
       --text-secondary: #adb5bd;

@@ -58,6 +58,21 @@ export function renderReader(article: Article): string {
     }
   </script>
 
+  <!-- Apply theme before CSS loads to prevent FOUC -->
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var validThemes = ['light', 'dark', 'auto'];
+        if (theme && validThemes.indexOf(theme) !== -1 && theme !== 'auto') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) {
+        // localStorage unavailable (private browsing, etc.) - gracefully continue
+      }
+    })();
+  </script>
+
   <style>
     ${styles}
   </style>
@@ -76,6 +91,7 @@ export function renderReader(article: Article): string {
       <input type="hidden" name="_method" value="DELETE">
       <button type="submit" class="delete"><span class="toolbar-icon">🗑️</span><span class="toolbar-text"> Delete</span></button>
     </form>
+    <button id="theme-toggle" title="Theme: auto" aria-label="Toggle theme (current: auto)" type="button">💻</button>
   </div>
 
   <div class="container">
@@ -91,6 +107,8 @@ export function renderReader(article: Article): string {
       ${article.content}
     </div>
   </div>
+
+  <script src="/public/theme.js" defer></script>
 </body>
 </html>
   `.trim();
