@@ -1,7 +1,7 @@
 /**
  * Theme Management
  *
- * Handles 3-way theme toggle (Light/Dark/Auto) for the Reader application.
+ * Handles 2-way theme toggle (Light/Dark) for the Reader application.
  * Provides manual theme selection with localStorage persistence.
  *
  * @module theme
@@ -14,7 +14,7 @@
    * Valid theme values
    * @constant {string[]}
    */
-  const VALID_THEMES = ['light', 'dark', 'auto'];
+  const VALID_THEMES = ['light', 'dark'];
 
   /**
    * Theme icon mapping
@@ -22,13 +22,12 @@
    */
   const THEME_ICONS = {
     light: '☀️',
-    dark: '🌙',
-    auto: '💻'
+    dark: '🌙'
   };
 
   /**
    * Get current theme from DOM attribute or localStorage
-   * @returns {string} Current theme: "light" | "dark" | "auto"
+   * @returns {string} Current theme: "light" | "dark"
    */
   function getCurrentTheme() {
     // First check DOM attribute
@@ -48,26 +47,22 @@
       console.warn('localStorage unavailable:', e);
     }
 
-    return 'auto';
+    // Default to light theme
+    return 'light';
   }
 
   /**
-   * Calculate next theme in cycle: light → dark → auto → light
+   * Calculate next theme: light → dark → light
    * @param {string} currentTheme - Current theme value
-   * @returns {string} Next theme in cycle
+   * @returns {string} Next theme
    */
   function getNextTheme(currentTheme) {
-    const cycleMap = {
-      'auto': 'light',
-      'light': 'dark',
-      'dark': 'auto'
-    };
-    return cycleMap[currentTheme] || 'light';
+    return currentTheme === 'light' ? 'dark' : 'light';
   }
 
   /**
    * Apply theme to DOM and persist to localStorage
-   * @param {string} theme - Theme to apply: "light" | "dark" | "auto"
+   * @param {string} theme - Theme to apply: "light" | "dark"
    */
   function applyTheme(theme) {
     // Validate theme value
@@ -77,11 +72,7 @@
     }
 
     // Update DOM attribute
-    if (theme === 'auto') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
+    document.documentElement.setAttribute('data-theme', theme);
 
     // Persist to localStorage with error handling
     try {
@@ -104,7 +95,7 @@
     const button = document.getElementById('theme-toggle');
     if (!button) return;
 
-    const icon = THEME_ICONS[theme] || THEME_ICONS.auto;
+    const icon = THEME_ICONS[theme] || THEME_ICONS.light;
     button.textContent = icon;
     button.setAttribute('title', `Theme: ${theme}`);
     button.setAttribute('aria-label', `Toggle theme (current: ${theme})`);
@@ -121,34 +112,6 @@
     applyTheme(nextTheme);
   }
 
-  /**
-   * Initialize system theme listener for auto mode
-   * Listens to system theme changes and updates button state accordingly
-   */
-  function initSystemThemeListener() {
-    // Only relevant if browser supports matchMedia
-    if (!window.matchMedia) return;
-
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    // Update button state when system theme changes (only if in auto mode)
-    function handleSystemThemeChange() {
-      const currentTheme = getCurrentTheme();
-      if (currentTheme === 'auto') {
-        updateButtonState('auto');
-      }
-    }
-
-    // Modern browsers use addEventListener
-    if (darkModeQuery.addEventListener) {
-      darkModeQuery.addEventListener('change', handleSystemThemeChange);
-    }
-    // Fallback for older browsers
-    else if (darkModeQuery.addListener) {
-      darkModeQuery.addListener(handleSystemThemeChange);
-    }
-  }
-
   // Initialize on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('theme-toggle');
@@ -160,9 +123,6 @@
       const currentTheme = getCurrentTheme();
       updateButtonState(currentTheme);
     }
-
-    // Initialize system theme listener
-    initSystemThemeListener();
   });
 
 })();
