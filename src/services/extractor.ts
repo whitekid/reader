@@ -189,7 +189,7 @@ export async function extractContent(url: string): Promise<ExtractedContent> {
     }
 
     // Calculate reading time (average 200 words per minute)
-    const wordCount = estimateWordCount(article.textContent);
+    const wordCount = estimateWordCount(article.textContent ?? '');
     const readingTime = Math.max(1, Math.ceil(wordCount / 200));
     const publishedTime = parsePublishedTime(document);
 

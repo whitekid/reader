@@ -49,7 +49,7 @@ beforeEach(() => {
 describe('Content Extraction', () => {
   it('should extract content from Naver Blog', async () => {
     // Mock fetch to return Naver Blog HTML
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => naverBlogHtml,
@@ -67,7 +67,7 @@ describe('Content Extraction', () => {
 
   it('should extract content from standard blog with Readability', async () => {
     // Mock fetch to return standard blog HTML
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => standardBlogHtml,
@@ -84,7 +84,7 @@ describe('Content Extraction', () => {
 
   it('should throw error for HTTP error response', async () => {
     // Mock fetch to return 404
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 404,
       statusText: 'Not Found',
@@ -95,7 +95,7 @@ describe('Content Extraction', () => {
 
   it('should throw error when content extraction fails', async () => {
     // Mock fetch to return empty HTML
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => '<html><body></body></html>',
@@ -105,7 +105,7 @@ describe('Content Extraction', () => {
   });
 
   it('should calculate reading time correctly', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => naverBlogHtml,
@@ -122,7 +122,7 @@ describe('Content Extraction', () => {
 
 describe('Naver Blog Special Handling', () => {
   it('should detect Naver Blog URL', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => naverBlogHtml,
@@ -134,7 +134,7 @@ describe('Naver Blog Special Handling', () => {
   });
 
   it('should extract title from og:title meta tag for Naver Blog', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => naverBlogHtml,
@@ -146,7 +146,7 @@ describe('Naver Blog Special Handling', () => {
   });
 
   it('should extract content from #postViewArea for Naver Blog', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => naverBlogHtml,

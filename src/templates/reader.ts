@@ -4,6 +4,7 @@
 
 import { styles } from './styles.js';
 import type { Article } from '../types.js';
+import { sanitizeArticleContent } from '../utils/sanitize.js';
 
 /**
  * Render article in reader mode
@@ -104,7 +105,7 @@ export function renderReader(article: Article): string {
     </div>
 
     <div class="article-content">
-      ${article.content}
+      ${sanitizeArticleContent(article.content)}
     </div>
   </div>
 
